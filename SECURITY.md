@@ -2,8 +2,7 @@
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+We are only actively supporting 5.2.x right now.  If for some reason you need a patch to a previous version please open an issue with the specifics and we will see if we can accomodate you.
 
 | Version | Supported          |
 | ------- | ------------------ |
