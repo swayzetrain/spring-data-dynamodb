@@ -1,3 +1,8 @@
+# 5.2.5
+
+## New Features
+1. [Allow single object as parameter to query a set/list](https://github.com/boostchicken/spring-data-dynamodb/issues/33)
+
 # 5.2.4
 
 ## Housekeeping
