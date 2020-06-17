@@ -296,6 +296,7 @@
                         <email>${project.url}</email>
                     </properties>
                     <excludes>
+                        <exclude>.github/*</exclude>
                         <exclude>**/README.md</exclude>
                         <exclude>**/FUNDING.yml</exclude>
                         <exclude>**/DONATION.md</exclude>
@@ -674,6 +675,13 @@
 
     <developers>
         <developer>
+            <id>boostchicken</id>
+            <name>John Dorman</name>
+            <email>dorman@ataxia.cloud</email>
+            <url>https://www.github.com/boostchicken</url>
+            <timezone>America/Los_Angeles</timezone>
+        </developer>
+        <developer>
             <id>michaellavelle</id>
             <name>Michael Lavelle</name>
             <timezone>0</timezone>
@@ -683,12 +691,6 @@
             <name>Sebastian J</name>
             <email>zeeman@zeeman.de</email>
             <timezone>America/New_York</timezone>
-        </developer>
-        <developer>
-            <id>boostchicken</id>
-            <name>John Dorman</name>
-            <url>https://www.github.com/boostchicken</url>
-            <timezone>America/Los_Angeles</timezone>
         </developer>
     </developers>
     <contributors>
@@ -732,10 +734,6 @@
             <name>Rene Enriquez</name>
             <url>enriquezrene</url>
         </contributor>
-        <contributor>
-            <name>John Dorman</name>
-            <url>https://github.com/boostchicken</url>
-		</contributor>
 		<contributor>
             <name>Ryon Day</name>
             <url>https://github.com/ryonday</url>
@@ -761,7 +759,7 @@
 
     <issueManagement>
     	<system>GitHub</system>
-    	<url>https://github.com/boostchicken/spring-data-dynamodb</url>
+    	<url>https://github.com/boostchicken/spring-data-dynamodb/issues</url>
     </issueManagement>
 
     <ciManagement>
