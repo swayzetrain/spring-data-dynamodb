@@ -34,7 +34,7 @@ Download the JAR though [Maven Central](http://mvnrepository.com/artifact/io.git
 <dependency>
   <groupId>io.github.boostchicken</groupId>
   <artifactId>spring-data-dynamodb</artifactId>
-  <version>5.2.4</version>
+  <version>5.2.5</version>
 </dependency>
 ```
 
