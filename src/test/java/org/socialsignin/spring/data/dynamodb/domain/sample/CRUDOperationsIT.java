@@ -17,7 +17,6 @@ package org.socialsignin.spring.data.dynamodb.domain.sample;
 
 import org.junit.Before;
 import org.junit.Rule;
-
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
@@ -36,8 +35,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
@@ -263,14 +264,163 @@ public class CRUDOperationsIT {
 
 	@Test
 	public void testDeleteNonExistentIdWithCondition() {
-		// Delete conditional
-		userRepository.deleteByIdAndName("non-existent", "non-existent");
-	}
+        // Delete conditional
+        userRepository.deleteByIdAndName("non-existent", "non-existent");
+    }
 
-	@Test
-	public void testDeleteNonExistingGsiWithConditoin() {
-		// Delete via GSI
-		userRepository.deleteByPostCodeAndNumberOfPlaylists("non-existing", 23);
+    @Test
+    public void testDeleteNonExistingGsiWithCondition() {
+        // Delete via GSI
+        userRepository.deleteByPostCodeAndNumberOfPlaylists("non-existing", 23);
 
-	}
+    }
+
+
+    @Test
+    public void testFilterWithCollections() {
+        // Prepare
+        User u1 = new User();
+        String name1 = "name1" + ThreadLocalRandom.current().nextLong();
+        u1.setId("u1");
+        u1.setName(name1);
+        u1.setPostCode("1234");
+        Set<String> u1Tags = new HashSet<>();
+        u1Tags.add("tag-a");
+        u1Tags.add("tag-b");
+        u1Tags.add("tag-c");
+        u1.setTags(u1Tags);
+
+        User u2 = new User();
+        String name2 = "name1" + ThreadLocalRandom.current().nextLong();
+        u2.setId("u2");
+        u2.setName(name2);
+        u2.setPostCode("1234");
+        Set<String> u2Tags = new HashSet<>();
+        u2Tags.add("tag-a");
+        u2Tags.add("tag-b");
+        u2.setTags(u2Tags);
+
+        User u3 = new User();
+        String name3 = "name1" + ThreadLocalRandom.current().nextLong();
+        u3.setId("u3");
+        u3.setName(name3);
+        u3.setPostCode("1234");
+        Set<String> u3Tags = new HashSet<>();
+        u3Tags.add("tag-a");
+        u3Tags.add("tag-c");
+        u3.setTags(u3Tags);
+
+
+        u1 = userRepository.save(u1);
+        u2 = userRepository.save(u2);
+        u3 = userRepository.save(u3);
+
+        Set<User> tagA = setOf(u1, u2, u3);
+        Set<User> tagB = setOf(u1,u2);
+        Set<User> tagC = setOf(u1, u3);
+
+        Set<User> notTagA = setOf();
+        Set<User> notTagB = setOf(u3);
+        Set<User> notTagC = setOf(u2);
+
+
+        // Single value
+        assertEquals(tagA, new HashSet<>(userRepository.findAllByTagsContaining("tag-a")));
+        assertEquals(tagB, new HashSet<>(userRepository.findAllByTagsContaining("tag-b")));
+        assertEquals(tagC, new HashSet<>(userRepository.findAllByTagsContaining("tag-c")));
+
+        assertEquals(tagA, new HashSet<>(userRepository.findAllByTagsContains("tag-a")));
+        assertEquals(tagB, new HashSet<>(userRepository.findAllByTagsContains("tag-b")));
+        assertEquals(tagC, new HashSet<>(userRepository.findAllByTagsContains("tag-c")));
+
+        assertEquals(tagA, new HashSet<>(userRepository.findAllByTagsIsContaining("tag-a")));
+        assertEquals(tagB, new HashSet<>(userRepository.findAllByTagsIsContaining("tag-b")));
+        assertEquals(tagC, new HashSet<>(userRepository.findAllByTagsIsContaining("tag-c")));
+
+        assertEquals(notTagA, new HashSet<>(userRepository.findAllByTagsNotContaining("tag-a")));
+        assertEquals(notTagB, new HashSet<>(userRepository.findAllByTagsNotContaining("tag-b")));
+        assertEquals(notTagC, new HashSet<>(userRepository.findAllByTagsNotContaining("tag-c")));
+
+        assertEquals(notTagA, new HashSet<>(userRepository.findAllByTagsNotContains("tag-a")));
+        assertEquals(notTagB, new HashSet<>(userRepository.findAllByTagsNotContains("tag-b")));
+        assertEquals(notTagC, new HashSet<>(userRepository.findAllByTagsNotContains("tag-c")));
+
+        assertEquals(notTagA, new HashSet<>(userRepository.findAllByTagsIsNotContaining("tag-a")));
+        assertEquals(notTagB, new HashSet<>(userRepository.findAllByTagsIsNotContaining("tag-b")));
+        assertEquals(notTagC, new HashSet<>(userRepository.findAllByTagsIsNotContaining("tag-c")));
+
+
+        //Sets
+        assertEquals(tagA, new HashSet<>(userRepository.findAllByTagsContaining(setOf("tag-a"))));
+        assertEquals(tagB, new HashSet<>(userRepository.findAllByTagsContaining(setOf("tag-b"))));
+        assertEquals(tagC, new HashSet<>(userRepository.findAllByTagsContaining(setOf("tag-c"))));
+
+        assertEquals(tagA, new HashSet<>(userRepository.findAllByTagsContains(setOf("tag-a"))));
+        assertEquals(tagB, new HashSet<>(userRepository.findAllByTagsContains(setOf("tag-b"))));
+        assertEquals(tagC, new HashSet<>(userRepository.findAllByTagsContains(setOf("tag-c"))));
+
+        assertEquals(tagA, new HashSet<>(userRepository.findAllByTagsIsContaining(setOf("tag-a"))));
+        assertEquals(tagB, new HashSet<>(userRepository.findAllByTagsIsContaining(setOf("tag-b"))));
+        assertEquals(tagC, new HashSet<>(userRepository.findAllByTagsIsContaining(setOf("tag-c"))));
+
+        assertEquals(notTagA, new HashSet<>(userRepository.findAllByTagsNotContaining(setOf("tag-a"))));
+        assertEquals(notTagB, new HashSet<>(userRepository.findAllByTagsNotContaining(setOf("tag-b"))));
+        assertEquals(notTagC, new HashSet<>(userRepository.findAllByTagsNotContaining(setOf("tag-c"))));
+
+        assertEquals(notTagA, new HashSet<>(userRepository.findAllByTagsNotContains(setOf("tag-a"))));
+        assertEquals(notTagB, new HashSet<>(userRepository.findAllByTagsNotContains(setOf("tag-b"))));
+        assertEquals(notTagC, new HashSet<>(userRepository.findAllByTagsNotContains(setOf("tag-c"))));
+
+        assertEquals(notTagA, new HashSet<>(userRepository.findAllByTagsIsNotContaining(setOf("tag-a"))));
+        assertEquals(notTagB, new HashSet<>(userRepository.findAllByTagsIsNotContaining(setOf("tag-b"))));
+        assertEquals(notTagC, new HashSet<>(userRepository.findAllByTagsIsNotContaining(setOf("tag-c"))));
+
+        //Lists
+        assertEquals(tagA, new HashSet<>(userRepository.findAllByTagsContaining(listOf("tag-a"))));
+        assertEquals(tagB, new HashSet<>(userRepository.findAllByTagsContaining(listOf("tag-b"))));
+        assertEquals(tagC, new HashSet<>(userRepository.findAllByTagsContaining(listOf("tag-c"))));
+
+        assertEquals(tagA, new HashSet<>(userRepository.findAllByTagsContains(listOf("tag-a"))));
+        assertEquals(tagB, new HashSet<>(userRepository.findAllByTagsContains(listOf("tag-b"))));
+        assertEquals(tagC, new HashSet<>(userRepository.findAllByTagsContains(listOf("tag-c"))));
+
+        assertEquals(tagA, new HashSet<>(userRepository.findAllByTagsIsContaining(listOf("tag-a"))));
+        assertEquals(tagB, new HashSet<>(userRepository.findAllByTagsIsContaining(listOf("tag-b"))));
+        assertEquals(tagC, new HashSet<>(userRepository.findAllByTagsIsContaining(listOf("tag-c"))));
+
+        assertEquals(notTagA, new HashSet<>(userRepository.findAllByTagsNotContaining(listOf("tag-a"))));
+        assertEquals(notTagB, new HashSet<>(userRepository.findAllByTagsNotContaining(listOf("tag-b"))));
+        assertEquals(notTagC, new HashSet<>(userRepository.findAllByTagsNotContaining(listOf("tag-c"))));
+
+        assertEquals(notTagA, new HashSet<>(userRepository.findAllByTagsNotContains(listOf("tag-a"))));
+        assertEquals(notTagB, new HashSet<>(userRepository.findAllByTagsNotContains(listOf("tag-b"))));
+        assertEquals(notTagC, new HashSet<>(userRepository.findAllByTagsNotContains(listOf("tag-c"))));
+
+        assertEquals(notTagA, new HashSet<>(userRepository.findAllByTagsIsNotContaining(listOf("tag-a"))));
+        assertEquals(notTagB, new HashSet<>(userRepository.findAllByTagsIsNotContaining(listOf("tag-b"))));
+        assertEquals(notTagC, new HashSet<>(userRepository.findAllByTagsIsNotContaining(listOf("tag-c"))));
+
+
+    }
+
+
+    @SafeVarargs
+    private final <E> Set<E> setOf(E... values) {
+        Set<E> result = new HashSet<>();
+
+        if (values != null) {
+            result.addAll(Arrays.asList(values));
+        }
+        return result;
+    }
+
+    @SafeVarargs
+    private final <E> List<E> listOf(E... values) {
+        List<E> result = new ArrayList<>();
+
+        if (values != null) {
+            result.addAll(Arrays.asList(values));
+        }
+        return result;
+    }
 }

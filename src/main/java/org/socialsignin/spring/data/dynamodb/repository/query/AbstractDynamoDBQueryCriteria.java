@@ -476,7 +476,7 @@ public abstract class AbstractDynamoDBQueryCriteria<T, ID> implements DynamoDBQu
 		return withCondition(propertyName, condition);
 	}
 
-	@Override
+    @Override
 	public DynamoDBQueryCriteria<T, ID> withSingleValueCriteria(String propertyName,
 			ComparisonOperator comparisonOperator, Object value, Class<?> propertyType) {
 		if (comparisonOperator.equals(ComparisonOperator.EQ)) {
@@ -554,8 +554,15 @@ public abstract class AbstractDynamoDBQueryCriteria<T, ID> implements DynamoDBQu
 
 			DynamoDBMapperFieldModel<T, Object> fieldModel = tableModel.field(attributeName);
 			if (fieldModel != null) {
-				return fieldModel.convert(value);
-			}
+                if (fieldModel.attributeType() == DynamoDBMapperFieldModel.DynamoDBAttributeType.SS) {
+                    if(value instanceof Collection) {
+                        return fieldModel.convert(value);
+                    } else {
+                        return new AttributeValue(value.toString());
+                    }
+                }
+                return fieldModel.convert(value);
+            }
 		}
 
 		return value;

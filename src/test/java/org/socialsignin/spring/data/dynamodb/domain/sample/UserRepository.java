@@ -25,13 +25,14 @@ import org.springframework.data.repository.query.Param;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 public interface UserRepository extends CrudRepository<User, String> {
 
 	@EnableScan
 	@Override
-	Iterable<User> findAll();
+	List<User> findAll();
 
 	// CRUD method using Optional
 	@Query(consistentReads = QueryConstants.ConsistentReadMode.CONSISTENT)
@@ -43,7 +44,61 @@ public interface UserRepository extends CrudRepository<User, String> {
 	@EnableScan
 	Optional<User> findByName(String name);
 
-	@EnableScan
+    @EnableScan
+    List<User> findAllByTagsContains(String tag);
+
+    @EnableScan
+    List<User> findAllByTagsContaining(String tag);
+
+    @EnableScan
+    List<User> findAllByTagsIsContaining(String tag);
+
+    @EnableScan
+    List<User> findAllByTagsNotContains(String tag);
+
+    @EnableScan
+    List<User> findAllByTagsNotContaining(String tag);
+
+    @EnableScan
+    List<User> findAllByTagsIsNotContaining(String tag);
+
+    @EnableScan
+    List<User> findAllByTagsContains(Set<String> tags);
+
+    @EnableScan
+    List<User> findAllByTagsContaining(Set<String> tags);
+
+    @EnableScan
+    List<User> findAllByTagsIsContaining(Set<String> tags);
+
+    @EnableScan
+    List<User> findAllByTagsNotContains(Set<String> tags);
+
+    @EnableScan
+    List<User> findAllByTagsNotContaining(Set<String> tags);
+
+    @EnableScan
+    List<User> findAllByTagsIsNotContaining(Set<String> tags);
+
+    @EnableScan
+    List<User> findAllByTagsContains(List<String> tags);
+
+    @EnableScan
+    List<User> findAllByTagsContaining(List<String> tags);
+
+    @EnableScan
+    List<User> findAllByTagsIsContaining(List<String> tags);
+
+    @EnableScan
+    List<User> findAllByTagsNotContains(List<String> tags);
+
+    @EnableScan
+    List<User> findAllByTagsNotContaining(List<String> tags);
+
+    @EnableScan
+    List<User> findAllByTagsIsNotContaining(List<String> tags);
+
+    @EnableScan
 	Future<User> findByNameAndPostCode(String name, String postCode);
 	@EnableScan
 	User findFirstByPostCode(String postCode);

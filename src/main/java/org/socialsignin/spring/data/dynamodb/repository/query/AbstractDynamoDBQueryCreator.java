@@ -39,6 +39,7 @@ import org.springframework.util.StringUtils;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -139,18 +140,12 @@ public abstract class AbstractDynamoDBQueryCreator<T, ID, R>
 
 		switch (part.getType()) {
 			case IN :
-				Object in = iterator.next();
-				Assert.notNull(in, "Creating conditions on null parameters not supported: please specify a value for '"
-						+ leafNodePropertyName + "'");
-				boolean isIterable = ClassUtils.isAssignable(Iterable.class, in.getClass());
-				boolean isArray = ObjectUtils.isArray(in);
-				Assert.isTrue(isIterable || isArray, "In criteria can only operate with Iterable or Array parameters");
-				Iterable<?> iterable = isIterable ? ((Iterable<?>) in) : Arrays.asList(ObjectUtils.toObjectArray(in));
-				return criteria.withPropertyIn(leafNodePropertyName, iterable, leafNodePropertyType);
-			case CONTAINING :
-				return criteria.withSingleValueCriteria(leafNodePropertyName, ComparisonOperator.CONTAINS,
-						iterator.next(), leafNodePropertyType);
-			case STARTING_WITH :
+                return getInProperty(criteria, iterator, leafNodePropertyType, leafNodePropertyName);
+            case CONTAINING :
+                return getItemsProperty(criteria, ComparisonOperator.CONTAINS, iterator, leafNodePropertyType, leafNodePropertyName);
+            case NOT_CONTAINING:
+                return getItemsProperty(criteria, ComparisonOperator.NOT_CONTAINS, iterator, leafNodePropertyType, leafNodePropertyName);
+            case STARTING_WITH :
 				return criteria.withSingleValueCriteria(leafNodePropertyName, ComparisonOperator.BEGINS_WITH,
 						iterator.next(), leafNodePropertyType);
 			case BETWEEN :
@@ -192,7 +187,38 @@ public abstract class AbstractDynamoDBQueryCreator<T, ID, R>
 
 	}
 
-	@Override
+    private DynamoDBQueryCriteria<T, ID> getItemsProperty(DynamoDBQueryCriteria<T, ID> criteria, ComparisonOperator comparisonOperator, Iterator<Object> iterator, Class<?> leafNodePropertyType, String leafNodePropertyName) {
+        Object in = iterator.next();
+        Assert.notNull(in, "Creating conditions on null parameters not supported: please specify a value for '" + leafNodePropertyName + "'");
+
+        if(ObjectUtils.isArray(in)) {
+            List<?> list = Arrays.asList(ObjectUtils.toObjectArray(in));
+            Assert.isTrue(list.size()==1, "Only one value is supported: please specify a value for '\" + leafNodePropertyName + \"'\"");
+            Object value = list.get(0);
+            return criteria.withSingleValueCriteria(leafNodePropertyName, comparisonOperator, value, leafNodePropertyType);
+        } else if(ClassUtils.isAssignable(Iterable.class, in.getClass())) {
+            Iterator<?> iter = ((Iterable<?>) in).iterator();
+            Assert.isTrue(iter.hasNext(), "Creating conditions on empty parameters not supported: please specify a value for '\" + leafNodePropertyName + \"'\"");
+            Object value = iter.next();
+            Assert.isTrue(!iter.hasNext(), "Only one value is supported: please specify a value for '\" + leafNodePropertyName + \"'\"");
+            return criteria.withSingleValueCriteria(leafNodePropertyName, comparisonOperator, value, leafNodePropertyType);
+        } else {
+            return criteria.withSingleValueCriteria(leafNodePropertyName, comparisonOperator, in, leafNodePropertyType);
+        }
+    }
+
+    private DynamoDBQueryCriteria<T, ID> getInProperty(DynamoDBQueryCriteria<T, ID> criteria, Iterator<Object> iterator, Class<?> leafNodePropertyType, String leafNodePropertyName) {
+        Object in = iterator.next();
+        Assert.notNull(in, "Creating conditions on null parameters not supported: please specify a value for '"
+                + leafNodePropertyName + "'");
+        boolean isIterable = ClassUtils.isAssignable(Iterable.class, in.getClass());
+        boolean isArray = ObjectUtils.isArray(in);
+        Assert.isTrue(isIterable || isArray, "In criteria can only operate with Iterable or Array parameters");
+        Iterable<?> iterable = isIterable ? ((Iterable<?>) in) : Arrays.asList(ObjectUtils.toObjectArray(in));
+        return criteria.withPropertyIn(leafNodePropertyName, iterable, leafNodePropertyType);
+    }
+
+    @Override
 	protected DynamoDBQueryCriteria<T, ID> and(Part part, DynamoDBQueryCriteria<T, ID> base,
 			Iterator<Object> iterator) {
 		return addCriteria(base, part, iterator);

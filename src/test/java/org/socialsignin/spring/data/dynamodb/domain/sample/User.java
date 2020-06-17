@@ -38,6 +38,8 @@ public class User {
 
 	private Date joinDate;
 
+	private Set<String> tags;
+
 	@SuppressWarnings("deprecation")
 	@DynamoDBMarshalling(marshallerClass = DynamoDBYearMarshaller.class)
 	private Date joinYear;
@@ -72,7 +74,15 @@ public class User {
 		this.joinYear = joinYear;
 	}
 
-	@SuppressWarnings("deprecation")
+    public Set<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<String> tags) {
+        this.tags = tags;
+    }
+
+    @SuppressWarnings("deprecation")
 	@DynamoDBMarshalling(marshallerClass = Instant2IsoDynamoDBMarshaller.class)
 	public Instant getLeaveDate() {
 		return leaveDate;
@@ -184,4 +194,8 @@ public class User {
 		return true;
 	}
 
+    @Override
+    public String toString() {
+        return "<User "+ id +">";
+    }
 }
