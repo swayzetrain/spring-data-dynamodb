@@ -37,7 +37,7 @@
     </licenses>
 
     <properties>
-        <spring.version>5.2.7.RELEASE</spring.version>
+        <spring.version>5.2.8.RELEASE</spring.version>
         <spring-data.version>2.3.1.RELEASE</spring-data.version>
 
         <hibernate-validator.version>6.1.5.Final</hibernate-validator.version>
