@@ -234,11 +234,6 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.10</version>
-                </plugin>
-                <plugin>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>3.1.1</version>
                 </plugin>
@@ -296,7 +291,7 @@
                         <email>${project.url}</email>
                     </properties>
                     <excludes>
-                        <exclude>.github/*</exclude>
+                        <exclude>.github/**</exclude>
                         <exclude>**/README.md</exclude>
                         <exclude>**/FUNDING.yml</exclude>
                         <exclude>**/DONATION.md</exclude>
