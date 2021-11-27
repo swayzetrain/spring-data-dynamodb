@@ -266,7 +266,7 @@
                         </manifest>
                         <manifestEntries>
                             <Specification-Title>Spring Data</Specification-Title>
-                            <Specification-Version>2.2</Specification-Version>
+                            <Specification-Version>2.6</Specification-Version>
                         </manifestEntries>
                     </archive>
                 </configuration>
