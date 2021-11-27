@@ -27,8 +27,14 @@ jobs:
     - run: git checkout HEAD^2
       if: ${{ github.event_name == 'pull_request' }}
 
+    - name: Setup Java JDK
+      uses: actions/setup-java@v2.3.1
+      with:
+        # The Java version to set up. Takes a whole or semver Java version. See examples of supported syntax in README file
+        java-version: 8
+
     - name: JAVA 8 And MAVEN Action
       # You may pin to the exact commit or the version.
       # uses: kobi-lemberg/github-maven-step@7f20340a98fc9890b1e47260368175df671788b1
-      uses: kobi-lemberg/github-maven-step@java8_new
-
+      uses: LucaFeger/action-maven-cli@1.1.0
+      args: "clean install"
