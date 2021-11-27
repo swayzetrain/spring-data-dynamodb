@@ -28,6 +28,6 @@ jobs:
       if: ${{ github.event_name == 'pull_request' }}
 
     - name: Run tests
-      uses: kobi-lemberg/github-maven-java@java8_maven3.6
+      uses: kobi-lemberg/github-maven-java
       with:
           command: clean install
