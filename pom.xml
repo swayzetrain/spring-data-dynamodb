@@ -95,10 +95,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-	    <dependency>
-		  <groupId>org.springframework.boot</groupId>
-		  <artifactId>spring-boot-starter-validation</artifactId>
-	    </dependency>
+
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>DynamoDBLocal</artifactId>
@@ -147,7 +144,10 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
         </dependency>
-
+	    <dependency>
+		  <groupId>org.springframework.boot</groupId>
+		  <artifactId>spring-boot-starter-validation</artifactId>
+	    </dependency>
         <!-- SPRING DATA -->
         <dependency>
             <groupId>org.springframework.data</groupId>
