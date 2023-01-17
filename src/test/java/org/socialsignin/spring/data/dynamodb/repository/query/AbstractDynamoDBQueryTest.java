@@ -17,10 +17,9 @@ package org.socialsignin.spring.data.dynamodb.repository.query;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -34,6 +33,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.socialsignin.spring.data.dynamodb.core.DynamoDBOperations;
@@ -45,12 +45,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.core.RepositoryMetadata;
+import org.springframework.data.util.TypeInformation;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractDynamoDBQueryTest {
 
-	public static interface UserRepository extends CrudRepository<User, String> {
-		public Page<User> findByName(String name, Pageable pageable);
+	public interface UserRepository extends CrudRepository<User, String> {
+		Page<User> findByName(String name, Pageable pageable);
 	}
 	@Mock
 	private Query<User> query;
@@ -110,10 +111,15 @@ public class AbstractDynamoDBQueryTest {
 	@Mock
 	private RepositoryMetadata metadata;
 	@Mock
+	private TypeInformation typeInformation;
+	@Mock
 	private ProjectionFactory factory;
 
 	@Before
 	public void setUp() {
+		doReturn(Page.class).when(typeInformation).getType();
+		doReturn(typeInformation).when(metadata)
+			.getReturnType(ArgumentMatchers.argThat(argument -> "findByName".equals(argument.getName())));
 		doReturn(UserRepository.class).when(metadata).getRepositoryInterface();
 		doReturn(User.class).when(metadata).getReturnedDomainClass(any());
 	}

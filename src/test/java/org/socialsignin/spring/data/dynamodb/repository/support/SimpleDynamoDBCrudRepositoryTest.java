@@ -51,8 +51,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for {@link DynamoDBSimpleIdRepository}.
- * 
+ * Unit tests for {@link SimpleDynamoDBCrudRepository}.
+ *
  * @author Michael Lavelle
  * @author Sebastian Just
  */
@@ -161,8 +161,8 @@ public class SimpleDynamoDBCrudRepositoryTest {
 
 	/**
 	 * /**
-	 * 
-	 * @see DATAJPA-177
+	 *
+	 * @see <a href="https://jira.spring.io/browse/DATAJPA-177">DATAJPA-177</a>
 	 */
 	@Test(expected = EmptyResultDataAccessException.class)
 	public void throwsExceptionIfEntityOnlyHashKeyToDeleteDoesNotExist() {
@@ -224,7 +224,7 @@ public class SimpleDynamoDBCrudRepositoryTest {
 	}
 
 	/**
-	 * @see DATAJPA-177
+	 * @see <a href="https://jira.spring.io/browse/DATAJPA-177">DATAJPA-177</a>
 	 */
 	@Test(expected = EmptyResultDataAccessException.class)
 	public void throwsExceptionIfEntityWithHashAndRangeKeyToDeleteDoesNotExist() {
