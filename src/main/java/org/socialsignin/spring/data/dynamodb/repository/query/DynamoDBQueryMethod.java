@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,11 @@
  */
 package org.socialsignin.spring.data.dynamodb.repository.query;
 
+import static org.socialsignin.spring.data.dynamodb.repository.QueryConstants.QUERY_LIMIT_UNLIMITED;
+
+import java.lang.reflect.Method;
+import java.util.Optional;
+
 import org.socialsignin.spring.data.dynamodb.repository.EnableScan;
 import org.socialsignin.spring.data.dynamodb.repository.EnableScanCount;
 import org.socialsignin.spring.data.dynamodb.repository.ExpressionAttribute;
@@ -26,11 +31,6 @@ import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.util.StringUtils;
-
-import java.lang.reflect.Method;
-import java.util.Optional;
-
-import static org.socialsignin.spring.data.dynamodb.repository.QueryConstants.QUERY_LIMIT_UNLIMITED;
 
 /**
  * @author Michael Lavelle
@@ -58,13 +58,13 @@ public class DynamoDBQueryMethod<T, ID> extends QueryMethod {
 		Query query = method.getAnnotation(Query.class);
 		if (query != null) {
 			String projections = query.fields();
-			if (!StringUtils.isEmpty(projections)) {
+			if (StringUtils.hasLength(projections)) {
 				this.projectionExpression = Optional.of(query.fields());
 			} else {
 				this.projectionExpression = Optional.empty();
 			}
 			String filterExp = query.filterExpression();
-			if(!StringUtils.isEmpty(filterExp)) {
+			if(StringUtils.hasLength(filterExp)) {
 				this.filterExpression = Optional.of(filterExp);
 			} else {
 				this.filterExpression = Optional.empty();
@@ -143,13 +143,13 @@ public class DynamoDBQueryMethod<T, ID> extends QueryMethod {
 		if(expressionAttributeNames != null) {
 			return expressionAttributeNames.clone();
 		}
-		return null;
+		return new ExpressionAttribute[0];
 	}
 
 	public ExpressionAttribute[] getExpressionAttributeValues() {
 		if(expressionAttributeValues != null) {
 			return expressionAttributeValues.clone();
 		}
-		return null;
+		return new ExpressionAttribute[0];
 	}
 }

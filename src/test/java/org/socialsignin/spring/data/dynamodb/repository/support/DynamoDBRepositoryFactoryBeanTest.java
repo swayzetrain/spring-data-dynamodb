@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,17 @@
  */
 package org.socialsignin.spring.data.dynamodb.repository.support;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.spy;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.socialsignin.spring.data.dynamodb.core.DynamoDBOperations;
 import org.socialsignin.spring.data.dynamodb.domain.sample.User;
 import org.socialsignin.spring.data.dynamodb.mapping.DynamoDBMappingContext;
@@ -31,13 +34,11 @@ import org.socialsignin.spring.data.dynamodb.repository.util.Entity2DynamoDBTabl
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.repository.Repository;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.spy;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 
-@RunWith(MockitoJUnitRunner.class)
-public class DynamoDBRepositoryFactoryBeanTest {
+@ExtendWith(MockitoExtension.class)
+class DynamoDBRepositoryFactoryBeanTest {
 
 	@Mock
 	private ApplicationContext applicationContext;
@@ -60,7 +61,7 @@ public class DynamoDBRepositoryFactoryBeanTest {
 
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		underTest = spy(new DynamoDBRepositoryFactoryBean<>(UserRepository.class));
 		underTest.setDynamoDBMappingContext(dynamoDBMappingContext);
@@ -69,7 +70,7 @@ public class DynamoDBRepositoryFactoryBeanTest {
 	}
 
 	@Test
-	public void testDynamoDBOperations() {
+	void testDynamoDBOperations() {
 		try {
 			underTest.getPersistentEntity();
 			fail();
@@ -84,7 +85,7 @@ public class DynamoDBRepositoryFactoryBeanTest {
 	}
 
 	@Test
-	public void testAmazonDynamoDB() {
+	void testAmazonDynamoDB() {
 		try {
 			underTest.getPersistentEntity();
 			fail();

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,14 @@
  */
 package org.socialsignin.spring.data.dynamodb.domain;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -27,15 +30,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 
-@RunWith(MockitoJUnitRunner.class)
-public class UnpagedPageImplTest {
+@ExtendWith(MockitoExtension.class)
+class UnpagedPageImplTest {
 
 	@Mock
 	private List<Object> content;
@@ -45,14 +49,14 @@ public class UnpagedPageImplTest {
 
 	private UnpagedPageImpl<Object> underTest;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
-		when(content.iterator()).thenReturn(iterator);
+		lenient().when(content.iterator()).thenReturn(iterator);
 		underTest = new UnpagedPageImpl<Object>(content, total);
 	}
 
 	@Test
-	public void testStaticValues() {
+	void testStaticValues() {
 		assertSame(iterator, underTest.iterator());
 		assertSame(Pageable.unpaged().getSort(), underTest.getSort());
 
@@ -74,38 +78,37 @@ public class UnpagedPageImplTest {
 	}
 
 	@Test
-	public void testEquals() {
-		assertFalse(underTest.equals(null));
-		assertFalse(underTest.equals(new Object()));
+	void testEquals() {
+		assertNotNull(underTest);
+		assertNotEquals(underTest, new Object());
+		assertEquals(underTest, underTest);
 
-		assertTrue(underTest.equals(underTest));
-
-		assertTrue(underTest.equals(new UnpagedPageImpl<Object>(content, total)));
-		assertFalse(underTest.equals(new UnpagedPageImpl<Object>(content, total - 1)));
-		assertFalse(underTest.equals(new UnpagedPageImpl<Object>(Collections.emptyList(), 0)));
+		assertEquals(underTest, new UnpagedPageImpl<Object>(content, total));
+		assertNotEquals(underTest, new UnpagedPageImpl<Object>(content, total - 1));
+		assertNotEquals(underTest, new UnpagedPageImpl<Object>(Collections.emptyList(), 0));
 	}
 
 	@Test
-	public void testHashCode() {
+	void testHashCode() {
 		assertEquals(underTest.hashCode(), underTest.hashCode());
 	}
 
 	@Test
-	public void testToString() {
+	void testToString() {
 		String actual = underTest.toString();
 
-		assertTrue(actual, actual.startsWith("Page 1 of 1 containing org.mockito.codegen.Iterator$MockitoMock"));
+		Assertions.assertTrue(actual.startsWith("Page 1 of 1 containing org.mockito.codegen.Iterator$MockitoMock"));
 	}
 
 	@Test
-	public void testLongContent() {
+	void testLongContent() {
 		underTest = new UnpagedPageImpl<>(content, Long.MAX_VALUE);
 
 		assertEquals(Integer.MAX_VALUE, underTest.getNumberOfElements());
 	}
 
 	@Test
-	public void testEmptyContent() {
+	void testEmptyContent() {
 		underTest = new UnpagedPageImpl<>(content, 0);
 
 		assertFalse(underTest.hasContent());

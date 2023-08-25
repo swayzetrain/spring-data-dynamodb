@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,18 @@
  */
 package org.socialsignin.spring.data.dynamodb.repository.util;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.socialsignin.spring.data.dynamodb.repository.support.DynamoDBEntityInformation;
 import org.socialsignin.spring.data.dynamodb.repository.support.SimpleDynamoDBCrudRepository;
 import org.springframework.aop.TargetSource;
@@ -29,6 +36,7 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.ContextStoppedEvent;
 import org.springframework.data.repository.core.RepositoryInformation;
+
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
@@ -37,10 +45,9 @@ import com.amazonaws.services.dynamodbv2.model.DescribeTableRequest;
 import com.amazonaws.services.dynamodbv2.model.DescribeTableResult;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.amazonaws.services.dynamodbv2.model.TableStatus;
-import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class Entity2DynamoDBTableSynchronizerTest<T, ID> {
+@ExtendWith(MockitoExtension.class)
+class Entity2DynamoDBTableSynchronizerTest<T, ID> {
 
 	private Entity2DynamoDBTableSynchronizer<T, ID> underTest;
 	@Mock
@@ -58,26 +65,26 @@ public class Entity2DynamoDBTableSynchronizerTest<T, ID> {
 	@Mock
 	private DynamoDBEntityInformation<T, ID> entityInformation;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		TargetSource targetSource = mock(TargetSource.class);
-		when(targetSource.getTarget()).thenReturn(repository);
-		when(factory.getTargetSource()).thenReturn(targetSource);
+		lenient().when(targetSource.getTarget()).thenReturn(repository);
+		lenient().when(factory.getTargetSource()).thenReturn(targetSource);
 
-		when(repository.getEntityInformation()).thenReturn(entityInformation);
+		lenient().when(repository.getEntityInformation()).thenReturn(entityInformation);
 
-		when(entityInformation.getDynamoDBTableName()).thenReturn("tableName");
+		lenient().when(entityInformation.getDynamoDBTableName()).thenReturn("tableName");
 
 		CreateTableRequest ctr = mock(CreateTableRequest.class);
-		when(mapper.generateCreateTableRequest(any())).thenReturn(ctr);
+		lenient().when(mapper.generateCreateTableRequest(any())).thenReturn(ctr);
 		DeleteTableRequest dtr = mock(DeleteTableRequest.class);
-		when(mapper.generateDeleteTableRequest(any())).thenReturn(dtr);
+		lenient().when(mapper.generateDeleteTableRequest(any())).thenReturn(dtr);
 
 		DescribeTableResult describeResult = mock(DescribeTableResult.class);
 		TableDescription description = mock(TableDescription.class);
-		when(description.getTableStatus()).thenReturn(TableStatus.ACTIVE.toString());
-		when(describeResult.getTable()).thenReturn(description);
-		when(amazonDynamoDB.describeTable(any(DescribeTableRequest.class))).thenReturn(describeResult);
+		lenient().when(description.getTableStatus()).thenReturn(TableStatus.ACTIVE.toString());
+		lenient().when(describeResult.getTable()).thenReturn(description);
+		lenient().when(amazonDynamoDB.describeTable(any(DescribeTableRequest.class))).thenReturn(describeResult);
 	}
 
 	public void setUp(Entity2DDL mode) {
@@ -94,7 +101,7 @@ public class Entity2DynamoDBTableSynchronizerTest<T, ID> {
 	}
 
 	@Test
-	public void testUnmatchedEvent() {
+	void testUnmatchedEvent() {
 		setUp(Entity2DDL.NONE);
 
 		underTest.onApplicationEvent(new ContextClosedEvent(applicationContext));
@@ -104,7 +111,7 @@ public class Entity2DynamoDBTableSynchronizerTest<T, ID> {
 	}
 
 	@Test
-	public void testNone() {
+	void testNone() {
 		setUp(Entity2DDL.NONE);
 
 		runContextStart();
@@ -117,7 +124,7 @@ public class Entity2DynamoDBTableSynchronizerTest<T, ID> {
 	}
 
 	@Test
-	public void testCreate() {
+	void testCreate() {
 		setUp(Entity2DDL.CREATE);
 
 		runContextStart();
@@ -131,7 +138,7 @@ public class Entity2DynamoDBTableSynchronizerTest<T, ID> {
 	}
 
 	@Test
-	public void testDrop() {
+	void testDrop() {
 		setUp(Entity2DDL.DROP);
 
 		runContextStart();
@@ -140,7 +147,7 @@ public class Entity2DynamoDBTableSynchronizerTest<T, ID> {
 	}
 
 	@Test
-	public void testCreateOnly() {
+	void testCreateOnly() {
 		setUp(Entity2DDL.CREATE_ONLY);
 
 		runContextStart();
@@ -152,7 +159,7 @@ public class Entity2DynamoDBTableSynchronizerTest<T, ID> {
 	}
 
 	@Test
-	public void testCreateDrop() {
+	void testCreateDrop() {
 		setUp(Entity2DDL.CREATE_DROP);
 
 		runContextStart();

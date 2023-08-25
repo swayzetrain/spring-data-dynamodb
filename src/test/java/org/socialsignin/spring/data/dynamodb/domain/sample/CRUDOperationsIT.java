@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,14 @@
  */
 package org.socialsignin.spring.data.dynamodb.domain.sample;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.socialsignin.spring.data.dynamodb.repository.config.EnableDynamoDBRepositories;
-import org.socialsignin.spring.data.dynamodb.utils.DynamoDBLocalResource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -44,21 +36,25 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.socialsignin.spring.data.dynamodb.repository.config.EnableDynamoDBRepositories;
+import org.socialsignin.spring.data.dynamodb.utils.DynamoDBLocalResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {DynamoDBLocalResource.class, CRUDOperationsIT.TestAppConfig.class})
 @TestPropertySource(properties = {"spring.data.dynamodb.entity2ddl.auto=create"})
-public class CRUDOperationsIT {
-
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
+class CRUDOperationsIT {
 
 	@Configuration
 	@EnableDynamoDBRepositories(basePackages = "org.socialsignin.spring.data.dynamodb.domain.sample")
@@ -72,7 +68,7 @@ public class CRUDOperationsIT {
 	@Autowired
 	private PlaylistRepository playlistRepository;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		userRepository.deleteAll();
 		userPaginationRepository.deleteAll();
@@ -80,7 +76,7 @@ public class CRUDOperationsIT {
 	}
 
 	@Test
-	public void testProjection() {
+	void testProjection() {
 		String postCode = "postCode";
 		String user1 = "projection1" + ThreadLocalRandom.current().nextLong();
 		String user2 = "projection2" + ThreadLocalRandom.current().nextLong();
@@ -118,21 +114,22 @@ public class CRUDOperationsIT {
 		// 2 matches but should be limited to 1 by @Query
 		assertEquals(1, projectedActuals.size());
 		User projectedActual = projectedActuals.get(0);
-		assertNull("Attribute not projected", projectedActual.getName());
-		assertNull("Attribute not projected", projectedActual.getPostCode());
-		assertNull("Attribute not projected", projectedActual.getNumberOfPlaylists());
-		assertNull("Key not projected", projectedActual.getId());
-		assertNotNull("LeaveDate is projected", projectedActual.getLeaveDate());
+		
+		assertNull(projectedActual.getName());
+		assertNull(projectedActual.getPostCode());
+		assertNull(projectedActual.getNumberOfPlaylists());
+		assertNull(projectedActual.getId());
+		assertNotNull(projectedActual.getLeaveDate());
 
 		List<User> projectedActuals2 = userRepository.findByPostCode(postCode);
 		assertEquals(1, projectedActuals2.size());
 		User projectedActual2 = projectedActuals2.get(0);
-		assertNull("Attribute not projected", projectedActual2.getName());
-		assertNull("Attribute not projected", projectedActual2.getPostCode());
-		assertNull("Attribute not projected", projectedActual2.getNumberOfPlaylists());
-		assertNull("Key not projected", projectedActual2.getId());
-		assertNotNull("LeaveDate is projected", projectedActual2.getLeaveDate());
-
+		assertNull(projectedActual2.getName());
+		assertNull(projectedActual2.getPostCode());
+		assertNull(projectedActual2.getNumberOfPlaylists());
+		assertNull(projectedActual2.getId());
+		assertNotNull(projectedActual2.getLeaveDate());
+		
 		List<User> fullActuals = userRepository.findByNameIn(Arrays.asList(user1, user2, user3));
 		assertEquals(3, fullActuals.size());
 		User fullActual = fullActuals.get(0);
@@ -145,7 +142,7 @@ public class CRUDOperationsIT {
 	}
 
 	@Test
-	public void testEmptyResult() throws InterruptedException, ExecutionException {
+	void testEmptyResult() throws InterruptedException, ExecutionException {
 
 		Future<User> actual1 = userRepository.findByNameAndPostCode("does not", "exist");
 		assertNull(actual1.get());
@@ -155,7 +152,7 @@ public class CRUDOperationsIT {
 	}
 
 	@Test
-	public void testDelete() {
+	void testDelete() {
 		// Prepare
 		User u1 = new User();
 		String name1 = "name1" + ThreadLocalRandom.current().nextLong();
@@ -178,11 +175,11 @@ public class CRUDOperationsIT {
 
 		List<User> actualList = new ArrayList<>();
 		userRepository.findAll().forEach(actualList::add);
-		assertEquals("Unexpected List: " + actualList, 3, actualList.size());
+		assertEquals(3, actualList.size());
 		actualList.clear();
 
 		userRepository.findByNameIn(Arrays.asList(name1, name2)).forEach(actualList::add);
-		assertEquals("Unexpected List: " + actualList, 2, actualList.size());
+		assertEquals(2, actualList.size());
 		actualList.clear();
 
 		// Delete specific
@@ -194,19 +191,17 @@ public class CRUDOperationsIT {
 		// Delete conditional
 		userRepository.deleteByIdAndName("u1", name1);
 		Optional<User> actualUser = userRepository.findById("u1");
-		assertFalse("User should have been deleted!", actualUser.isPresent());
+		assertFalse(actualUser.isPresent());
 	}
 
 	@Test
-	public void testDeleteNonExistent() {
-
-		expectedException.expect(EmptyResultDataAccessException.class);
+	void testDeleteNonExistent() {
 		// Delete specific
-		userRepository.deleteById("non-existent");
+		assertThatThrownBy(() -> userRepository.deleteById("non-existent")).isInstanceOf(EmptyResultDataAccessException.class);
 	}
 
 	@Test
-	public void testDeleteHashRangeKey() {
+	void testDeleteHashRangeKey() {
 		// setup
 		long rnd = ThreadLocalRandom.current().nextLong();
 		Playlist p = new Playlist();
@@ -216,14 +211,14 @@ public class CRUDOperationsIT {
 		playlistRepository.save(p);
 
 		PlaylistId id = new PlaylistId("userName-" + rnd, "playlistName-" + rnd);
-		assertTrue("Entity with id not found: " + id, playlistRepository.findById(id).isPresent());
+		assertTrue(playlistRepository.findById(id).isPresent());
 
 		playlistRepository.deleteById(id);
-		assertFalse("Entity with id not deleted: " + id, playlistRepository.findById(id).isPresent());
+		assertFalse(playlistRepository.findById(id).isPresent());
 	}
 
 	@Test
-	public void testFilterAndPagination() {
+	void testFilterAndPagination() {
 
 		Supplier<User> userSupplier = () -> {
 			User u = new User();
@@ -263,13 +258,13 @@ public class CRUDOperationsIT {
 	}
 
 	@Test
-	public void testDeleteNonExistentIdWithCondition() {
+	void testDeleteNonExistentIdWithCondition() {
         // Delete conditional
         userRepository.deleteByIdAndName("non-existent", "non-existent");
     }
 
     @Test
-    public void testDeleteNonExistingGsiWithCondition() {
+    void testDeleteNonExistingGsiWithCondition() {
         // Delete via GSI
         userRepository.deleteByPostCodeAndNumberOfPlaylists("non-existing", 23);
 
@@ -277,7 +272,7 @@ public class CRUDOperationsIT {
 
 
     @Test
-    public void testFilterWithCollections() {
+    void testFilterWithCollections() {
         // Prepare
         User u1 = new User();
         String name1 = "name1" + ThreadLocalRandom.current().nextLong();
@@ -399,8 +394,6 @@ public class CRUDOperationsIT {
         assertEquals(notTagA, new HashSet<>(userRepository.findAllByTagsIsNotContaining(listOf("tag-a"))));
         assertEquals(notTagB, new HashSet<>(userRepository.findAllByTagsIsNotContaining(listOf("tag-b"))));
         assertEquals(notTagC, new HashSet<>(userRepository.findAllByTagsIsNotContaining(listOf("tag-c"))));
-
-
     }
 
 

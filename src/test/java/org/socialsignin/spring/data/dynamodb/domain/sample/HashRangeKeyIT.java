@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,30 +15,31 @@
  */
 package org.socialsignin.spring.data.dynamodb.domain.sample;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
-import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
+import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 
 /**
  * Show the usage of Hash+Range key as also how to use XML based configuration
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(locations = {"classpath:META-INF/context/HashRangeKeyIT-context.xml"})
-public class HashRangeKeyIT {
+class HashRangeKeyIT {
 
 	@Autowired
 	private PlaylistRepository playlistRepository;
@@ -46,7 +47,7 @@ public class HashRangeKeyIT {
 	@Autowired
 	private AmazonDynamoDB ddb;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		CreateTableRequest ctr = new DynamoDBMapper(ddb).generateCreateTableRequest(Playlist.class);
 		ctr.withProvisionedThroughput(new ProvisionedThroughput(10L, 10L));
@@ -54,7 +55,7 @@ public class HashRangeKeyIT {
 	}
 
 	@Test
-	public void runCrudOperations() {
+	void runCrudOperations() {
 		final String displayName = "displayName" + UUID.randomUUID().toString();
 		final String userName = "userName-" + UUID.randomUUID().toString();
 		final String playlistName = "playlistName-" + UUID.randomUUID().toString();

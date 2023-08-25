@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ public abstract class AbstractDynamoDBQueryCreator<T, ID, R>
 		if(values != null) {
 			this.expressionAttributeValues = values.clone();
 			for(ExpressionAttribute value: expressionAttributeValues) {
-				if(!StringUtils.isEmpty(value.parameterName())) {
+				if(StringUtils.hasLength(value.parameterName())) {
 					for(Parameter p : ((ParametersParameterAccessor)parameterAccessor).getParameters()) {
 						if(p.getName().isPresent() && p.getName().get().equals(value.parameterName())) {
 							mappedExpressionValues.put(value.parameterName(), (String) parameterAccessor.getBindableValue(p.getIndex()));

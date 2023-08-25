@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,16 @@
  */
 package org.socialsignin.spring.data.dynamodb.mapping;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIgnore;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
 
 /**
  * Unit tests for {@link DynamoDBPersistentPropertyImpl}.
@@ -33,13 +32,13 @@ import static org.junit.Assert.assertThat;
  * @author Michael Lavelle
  * @author Sebastian Just
  */
-@RunWith(MockitoJUnitRunner.class)
-public class DynamoDBPersistentPropertyImplUnitTest {
+@ExtendWith(MockitoExtension.class)
+class DynamoDBPersistentPropertyImplUnitTest {
 
 	DynamoDBMappingContext context;
 	DynamoDBPersistentEntity<?> entity;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		context = new DynamoDBMappingContext();
@@ -50,18 +49,18 @@ public class DynamoDBPersistentPropertyImplUnitTest {
 	 * @see DATAJPA-284
 	 */
 	@Test
-	public void considersOtherPropertiesAsNotTransient() {
+	void considersOtherPropertiesAsNotTransient() {
 
 		DynamoDBPersistentProperty property = entity.getPersistentProperty("otherProp");
-		assertThat(property, is(notNullValue()));
+		assertNotNull(property);
 	}
 
 	/**
 	 * @see DATAJPA-376
 	 */
 	@Test
-	public void considersDynamoDBIgnoredPropertiesAsTransient() {
-		assertThat(entity.getPersistentProperty("ignoredProp"), is(nullValue()));
+	void considersDynamoDBIgnoredPropertiesAsTransient() {
+		assertNull(entity.getPersistentProperty("ignoredProp"));
 	}
 
 	@DynamoDBTable(tableName = "sample")

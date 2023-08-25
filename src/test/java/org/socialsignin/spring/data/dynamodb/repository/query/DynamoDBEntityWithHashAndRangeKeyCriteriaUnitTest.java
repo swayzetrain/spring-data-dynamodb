@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,27 @@
  */
 package org.socialsignin.spring.data.dynamodb.repository.query;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.socialsignin.spring.data.dynamodb.domain.sample.Playlist;
 import org.socialsignin.spring.data.dynamodb.repository.support.DynamoDBIdIsHashAndRangeKeyEntityInformation;
 
-@RunWith(MockitoJUnitRunner.class)
-public class DynamoDBEntityWithHashAndRangeKeyCriteriaUnitTest
+@ExtendWith(MockitoExtension.class)
+class DynamoDBEntityWithHashAndRangeKeyCriteriaUnitTest
 		extends
 			AbstractDynamoDBQueryCriteriaUnitTest<DynamoDBEntityWithHashAndRangeKeyCriteria<Playlist, String>> {
 
 	@Mock
 	private DynamoDBIdIsHashAndRangeKeyEntityInformation<Playlist, String> entityInformation;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		Mockito.when(entityInformation.getHashKeyPropertyName()).thenReturn("userName");
 		Mockito.when(entityInformation.getRangeKeyPropertyName()).thenReturn("playlistName");
@@ -41,212 +43,212 @@ public class DynamoDBEntityWithHashAndRangeKeyCriteriaUnitTest
 	}
 
 	@Test
-	public void testHasIndexHashKeyEqualConditionAnd_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsAnIndexHashKeyButNotAHashKeyOrRangeKey() {
+	void testHasIndexHashKeyEqualConditionAnd_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsAnIndexHashKeyButNotAHashKeyOrRangeKey() {
 		Mockito.when(entityInformation.isGlobalIndexHashKeyProperty("displayName")).thenReturn(true);
 		criteria.withPropertyEquals("displayName", "some display name", String.class);
 		boolean hasIndexHashKeyEqualCondition = criteria.hasIndexHashKeyEqualCondition();
-		Assert.assertTrue(hasIndexHashKeyEqualCondition);
+		assertTrue(hasIndexHashKeyEqualCondition);
 	}
 
 	@Test
-	public void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsNotAnIndexHashKeyButIsAHashKey() {
+	void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsNotAnIndexHashKeyButIsAHashKey() {
 		Mockito.when(entityInformation.isGlobalIndexHashKeyProperty("userName")).thenReturn(false);
 		criteria.withPropertyEquals("userName", "some user name", String.class);
 		boolean hasIndexHashKeyEqualCondition = criteria.hasIndexHashKeyEqualCondition();
-		Assert.assertFalse(hasIndexHashKeyEqualCondition);
+		assertFalse(hasIndexHashKeyEqualCondition);
 	}
 
 	@Test
-	public void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsNotAnIndexHashKeyButIsARangeKey() {
+	void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsNotAnIndexHashKeyButIsARangeKey() {
 		Mockito.when(entityInformation.isGlobalIndexHashKeyProperty("playlistName")).thenReturn(false);
 		criteria.withPropertyEquals("playlistName", "some playlist name", String.class);
 		boolean hasIndexHashKeyEqualCondition = criteria.hasIndexHashKeyEqualCondition();
-		Assert.assertFalse(hasIndexHashKeyEqualCondition);
+		assertFalse(hasIndexHashKeyEqualCondition);
 	}
 
 	@Test
-	public void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsBothAnIndexHashKeyAndAHashKey() {
+	void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsBothAnIndexHashKeyAndAHashKey() {
 		Mockito.when(entityInformation.isGlobalIndexHashKeyProperty("userName")).thenReturn(true);
 		criteria.withPropertyEquals("userName", "some user name", String.class);
 		boolean hasIndexHashKeyEqualCondition = criteria.hasIndexHashKeyEqualCondition();
-		Assert.assertTrue(hasIndexHashKeyEqualCondition);
+		assertTrue(hasIndexHashKeyEqualCondition);
 	}
 
 	@Test
-	public void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsBothAnIndexHashKeyAndARangeKey() {
+	void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsBothAnIndexHashKeyAndARangeKey() {
 		Mockito.when(entityInformation.isGlobalIndexHashKeyProperty("playlistName")).thenReturn(true);
 		criteria.withPropertyEquals("playlistName", "some playlist name", String.class);
 		boolean hasIndexHashKeyEqualCondition = criteria.hasIndexHashKeyEqualCondition();
-		Assert.assertTrue(hasIndexHashKeyEqualCondition);
+		assertTrue(hasIndexHashKeyEqualCondition);
 	}
 
 	@Test
-	public void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsNeitherAnIndexHashKeyOrAHashKeyOrRangeKey() {
+	void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsNeitherAnIndexHashKeyOrAHashKeyOrRangeKey() {
 		Mockito.when(entityInformation.isGlobalIndexHashKeyProperty("displayName")).thenReturn(false);
 		criteria.withPropertyEquals("displayName", "some display name", String.class);
 		boolean hasIndexHashKeyEqualCondition = criteria.hasIndexHashKeyEqualCondition();
-		Assert.assertFalse(hasIndexHashKeyEqualCondition);
+		assertFalse(hasIndexHashKeyEqualCondition);
 	}
 
 	@Test
-	public void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsNeitherAnIndexHashKeyOrAHashKeyButIsRangeKey() {
+	void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsNeitherAnIndexHashKeyOrAHashKeyButIsRangeKey() {
 		Mockito.when(entityInformation.isGlobalIndexHashKeyProperty("playlistName")).thenReturn(false);
 		criteria.withPropertyEquals("playlistName", "some playlist name", String.class);
 		boolean hasIndexHashKeyEqualCondition = criteria.hasIndexHashKeyEqualCondition();
-		Assert.assertFalse(hasIndexHashKeyEqualCondition);
+		assertFalse(hasIndexHashKeyEqualCondition);
 	}
 
 	@Test
-	public void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsAnIndexRangeKeyButNotAHashKeyOrRangeKey() {
+	void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsAnIndexRangeKeyButNotAHashKeyOrRangeKey() {
 		Mockito.when(entityInformation.isGlobalIndexRangeKeyProperty("displayName")).thenReturn(true);
 		criteria.withPropertyEquals("displayName", "some display name", String.class);
 		boolean hasIndexRangeKeyCondition = criteria.hasIndexRangeKeyCondition();
-		Assert.assertTrue(hasIndexRangeKeyCondition);
+		assertTrue(hasIndexRangeKeyCondition);
 	}
 
 	@Test
-	public void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsAnIndexRangeKeyButNotAHashKeyAndIsARangeKey() {
+	void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsAnIndexRangeKeyButNotAHashKeyAndIsARangeKey() {
 		Mockito.when(entityInformation.isGlobalIndexRangeKeyProperty("playlistName")).thenReturn(true);
 		criteria.withPropertyEquals("playlistName", "some playlist name", String.class);
 		boolean hasIndexRangeKeyCondition = criteria.hasIndexRangeKeyCondition();
-		Assert.assertTrue(hasIndexRangeKeyCondition);
+		assertTrue(hasIndexRangeKeyCondition);
 	}
 
 	@Test
-	public void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsNotAnIndexRangeKeyButIsAHashKey() {
+	void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsNotAnIndexRangeKeyButIsAHashKey() {
 		Mockito.when(entityInformation.isGlobalIndexRangeKeyProperty("userName")).thenReturn(false);
 		criteria.withPropertyEquals("userName", "some user name", String.class);
 		boolean hasIndexRangeKeyCondition = criteria.hasIndexRangeKeyCondition();
-		Assert.assertFalse(hasIndexRangeKeyCondition);
+		assertFalse(hasIndexRangeKeyCondition);
 	}
 
 	@Test
-	public void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsNotAnIndexRangeKeyButIsARangeKey() {
+	void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsNotAnIndexRangeKeyButIsARangeKey() {
 		criteria.withPropertyEquals("playlist name", "some playlist name", String.class);
 		boolean hasIndexRangeKeyCondition = criteria.hasIndexRangeKeyCondition();
-		Assert.assertFalse(hasIndexRangeKeyCondition);
+		assertFalse(hasIndexRangeKeyCondition);
 	}
 
 	@Test
-	public void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsBothAnIndexRangeKeyAndAHashKey() {
+	void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsBothAnIndexRangeKeyAndAHashKey() {
 		Mockito.when(entityInformation.isGlobalIndexRangeKeyProperty("userName")).thenReturn(true);
 		criteria.withPropertyEquals("userName", "some user name", String.class);
 		boolean hasIndexRangeKeyCondition = criteria.hasIndexRangeKeyCondition();
-		Assert.assertTrue(hasIndexRangeKeyCondition);
+		assertTrue(hasIndexRangeKeyCondition);
 	}
 
 	@Test
-	public void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsNeitherAnIndexRangeKeyOrAHashKeyOrARangeKey() {
+	void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsNeitherAnIndexRangeKeyOrAHashKeyOrARangeKey() {
 		Mockito.when(entityInformation.isGlobalIndexRangeKeyProperty("displayName")).thenReturn(false);
 		criteria.withPropertyEquals("displayName", "some display name", String.class);
 		boolean hasIndexRangeKeyCondition = criteria.hasIndexRangeKeyCondition();
-		Assert.assertFalse(hasIndexRangeKeyCondition);
+		assertFalse(hasIndexRangeKeyCondition);
 	}
 
 	@Test
-	public void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsNeitherAnIndexRangeKeyOrAHashKeyButIsARangeKey() {
+	void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsEqualityOnAPropertyWhichIsNeitherAnIndexRangeKeyOrAHashKeyButIsARangeKey() {
 		Mockito.when(entityInformation.isGlobalIndexRangeKeyProperty("playlistName")).thenReturn(false);
 		criteria.withPropertyEquals("playlistName", "some playlist name", String.class);
 		boolean hasIndexRangeKeyCondition = criteria.hasIndexRangeKeyCondition();
-		Assert.assertFalse(hasIndexRangeKeyCondition);
+		assertFalse(hasIndexRangeKeyCondition);
 	}
 
 	// repeat
 
 	@Test
-	public void testHasIndexHashKeyEqualConditionAnd_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsAnIndexHashKeyButNotAHashKeyOrRangeKey() {
+	void testHasIndexHashKeyEqualConditionAnd_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsAnIndexHashKeyButNotAHashKeyOrRangeKey() {
 		Mockito.when(entityInformation.isGlobalIndexHashKeyProperty("displayName")).thenReturn(true);
 		criteria.withPropertyBetween("displayName", "some display name", "some other display name", String.class);
 		boolean hasIndexHashKeyEqualCondition = criteria.hasIndexHashKeyEqualCondition();
-		Assert.assertFalse(hasIndexHashKeyEqualCondition);
+		assertFalse(hasIndexHashKeyEqualCondition);
 	}
 
 	@Test
-	public void testHasIndexHashKeyEqualConditionAnd_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsAnIndexHashKeyButNotAHashKeyButIsARangeKey() {
+	void testHasIndexHashKeyEqualConditionAnd_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsAnIndexHashKeyButNotAHashKeyButIsARangeKey() {
 		Mockito.when(entityInformation.isGlobalIndexHashKeyProperty("playlistName")).thenReturn(true);
 		criteria.withPropertyBetween("playlistName", "some playlist name", "some other playlist name", String.class);
 		boolean hasIndexHashKeyEqualCondition = criteria.hasIndexHashKeyEqualCondition();
-		Assert.assertFalse(hasIndexHashKeyEqualCondition);
+		assertFalse(hasIndexHashKeyEqualCondition);
 	}
 
 	@Test
-	public void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsNotAnIndexHashKeyButIsAHashKey() {
+	void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsNotAnIndexHashKeyButIsAHashKey() {
 		Mockito.when(entityInformation.isGlobalIndexHashKeyProperty("userName")).thenReturn(false);
 		criteria.withPropertyBetween("userName", "some user name", "some other user name", String.class);
 		boolean hasIndexHashKeyEqualCondition = criteria.hasIndexHashKeyEqualCondition();
-		Assert.assertFalse(hasIndexHashKeyEqualCondition);
+		assertFalse(hasIndexHashKeyEqualCondition);
 	}
 
 	@Test
-	public void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsBothAnIndexHashKeyAndAHashKey() {
+	void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsBothAnIndexHashKeyAndAHashKey() {
 		Mockito.when(entityInformation.isGlobalIndexHashKeyProperty("userName")).thenReturn(true);
 		criteria.withPropertyBetween("userName", "some user name", "some other user name", String.class);
 		boolean hasIndexHashKeyEqualCondition = criteria.hasIndexHashKeyEqualCondition();
-		Assert.assertFalse(hasIndexHashKeyEqualCondition);
+		assertFalse(hasIndexHashKeyEqualCondition);
 	}
 
 	@Test
-	public void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsNeitherAnIndexHashKeyOrAHashKeyOrARangeKey() {
+	void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsNeitherAnIndexHashKeyOrAHashKeyOrARangeKey() {
 		Mockito.when(entityInformation.isGlobalIndexHashKeyProperty("displayName")).thenReturn(false);
 		criteria.withPropertyBetween("displayName", "some display name", "some other display name", String.class);
 		boolean hasIndexHashKeyEqualCondition = criteria.hasIndexHashKeyEqualCondition();
-		Assert.assertFalse(hasIndexHashKeyEqualCondition);
+		assertFalse(hasIndexHashKeyEqualCondition);
 	}
 
 	@Test
-	public void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsNeitherAnIndexHashKeyOrAHashKeyButIsARangeKey() {
+	void testHasIndexHashKeyEqualCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsNeitherAnIndexHashKeyOrAHashKeyButIsARangeKey() {
 		Mockito.when(entityInformation.isGlobalIndexHashKeyProperty("playlistName")).thenReturn(false);
 		criteria.withPropertyBetween("playlistName", "some playlist name", "some other playlist name", String.class);
 		boolean hasIndexHashKeyEqualCondition = criteria.hasIndexHashKeyEqualCondition();
-		Assert.assertFalse(hasIndexHashKeyEqualCondition);
+		assertFalse(hasIndexHashKeyEqualCondition);
 	}
 
 	@Test
-	public void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsAnIndexRangeKeyButNotAHashKeyOrARangeKey() {
+	void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsAnIndexRangeKeyButNotAHashKeyOrARangeKey() {
 		Mockito.when(entityInformation.isGlobalIndexRangeKeyProperty("displayName")).thenReturn(true);
 		criteria.withPropertyBetween("displayName", "some display name", "some other display name", String.class);
 		boolean hasIndexRangeKeyCondition = criteria.hasIndexRangeKeyCondition();
-		Assert.assertTrue(hasIndexRangeKeyCondition);
+		assertTrue(hasIndexRangeKeyCondition);
 	}
 
 	@Test
-	public void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsAnIndexRangeKeyButNotAHashKeyButIsARangeKey() {
+	void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsAnIndexRangeKeyButNotAHashKeyButIsARangeKey() {
 		Mockito.when(entityInformation.isGlobalIndexRangeKeyProperty("playlistName")).thenReturn(true);
 		criteria.withPropertyBetween("playlistName", "some playlist name", "some other playlist name", String.class);
 		boolean hasIndexRangeKeyCondition = criteria.hasIndexRangeKeyCondition();
-		Assert.assertTrue(hasIndexRangeKeyCondition);
+		assertTrue(hasIndexRangeKeyCondition);
 	}
 
 	@Test
-	public void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsNotAnIndexRangeKeyButIsAHashKey() {
+	void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsNotAnIndexRangeKeyButIsAHashKey() {
 		Mockito.when(entityInformation.isGlobalIndexRangeKeyProperty("userName")).thenReturn(false);
 		criteria.withPropertyBetween("userName", "some user name", "some other user name", String.class);
 		boolean hasIndexRangeKeyCondition = criteria.hasIndexRangeKeyCondition();
-		Assert.assertFalse(hasIndexRangeKeyCondition);
+		assertFalse(hasIndexRangeKeyCondition);
 	}
 
 	@Test
-	public void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsBothAnIndexRangeKeyAndAHashKey() {
+	void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsBothAnIndexRangeKeyAndAHashKey() {
 		Mockito.when(entityInformation.isGlobalIndexRangeKeyProperty("userName")).thenReturn(true);
 		criteria.withPropertyBetween("userName", "some user name", "some other user name", String.class);
 		boolean hasIndexRangeKeyCondition = criteria.hasIndexRangeKeyCondition();
-		Assert.assertTrue(hasIndexRangeKeyCondition);
+		assertTrue(hasIndexRangeKeyCondition);
 	}
 
 	@Test
-	public void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsNeitherAnIndexRangeKeyOrAHashKeyOrARangeKey() {
+	void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsNeitherAnIndexRangeKeyOrAHashKeyOrARangeKey() {
 		Mockito.when(entityInformation.isGlobalIndexRangeKeyProperty("displayName")).thenReturn(false);
 		criteria.withPropertyBetween("displayName", "some display name", "some other display name", String.class);
 		boolean hasIndexRangeKeyCondition = criteria.hasIndexRangeKeyCondition();
-		Assert.assertFalse(hasIndexRangeKeyCondition);
+		assertFalse(hasIndexRangeKeyCondition);
 	}
 
 	@Test
-	public void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsNeitherAnIndexRangeKeyOrAHashKeyButIsARangeKey() {
+	void testHasIndexRangeKeyCondition_WhenConditionCriteriaIsNonEqualityConditionOnAPropertyWhichIsNeitherAnIndexRangeKeyOrAHashKeyButIsARangeKey() {
 		Mockito.when(entityInformation.isGlobalIndexRangeKeyProperty("playlistName")).thenReturn(false);
 		criteria.withPropertyBetween("playlistName", "some playlist name", "some other playlist name", String.class);
 		boolean hasIndexRangeKeyCondition = criteria.hasIndexRangeKeyCondition();
-		Assert.assertFalse(hasIndexRangeKeyCondition);
+		assertFalse(hasIndexRangeKeyCondition);
 	}
 
 }

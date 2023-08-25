@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,23 @@
  */
 package org.socialsignin.spring.data.dynamodb.repository.support;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.socialsignin.spring.data.dynamodb.domain.sample.PlaylistId;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.lang.reflect.Method;
 
-@RunWith(MockitoJUnitRunner.class)
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.socialsignin.spring.data.dynamodb.domain.sample.PlaylistId;
+
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
+
+@ExtendWith(MockitoExtension.class)
 @SuppressWarnings("unused")
-public class DynamoDBHashAndRangeKeyMethodExtractorImplUnitTest {
+class DynamoDBHashAndRangeKeyMethodExtractorImplUnitTest {
 
 	private DynamoDBHashAndRangeKeyMethodExtractor<PlaylistId> playlistIdMetadata;
 	private DynamoDBHashAndRangeKeyMethodExtractor<IdClassWithNoAnnotatedMethods> idClassWithNoHashOrRangeKeyMethodMetadata;
@@ -37,50 +41,50 @@ public class DynamoDBHashAndRangeKeyMethodExtractorImplUnitTest {
 	private DynamoDBHashAndRangeKeyMethodExtractor<IdClassWithMulitpleAnnotatedRangeKeyMethods> idClassWitMultipleAnnotatedRangeKeysMetadata;
 
 	@Test
-	public void testConstruct_WhenHashKeyMethodExists_WhenRangeKeyMethodExists() {
+	void testConstruct_WhenHashKeyMethodExists_WhenRangeKeyMethodExists() {
 		playlistIdMetadata = new DynamoDBHashAndRangeKeyMethodExtractorImpl<PlaylistId>(PlaylistId.class);
 		Method hashKeyMethod = playlistIdMetadata.getHashKeyMethod();
-		Assert.assertNotNull(hashKeyMethod);
-		Assert.assertEquals("getUserName", hashKeyMethod.getName());
+		assertNotNull(hashKeyMethod);
+		assertEquals("getUserName", hashKeyMethod.getName());
 		Method rangeKeyMethod = playlistIdMetadata.getRangeKeyMethod();
-		Assert.assertNotNull(rangeKeyMethod);
-		Assert.assertEquals("getPlaylistName", rangeKeyMethod.getName());
+		assertNotNull(rangeKeyMethod);
+		assertEquals("getPlaylistName", rangeKeyMethod.getName());
 
-		Assert.assertEquals(PlaylistId.class, playlistIdMetadata.getJavaType());
-
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testConstruct_WhenHashKeyMethodExists_WhenRangeKeyMethodDoesNotExist() {
-		idClassWithOnlyHashKeyMethodMetadata = new DynamoDBHashAndRangeKeyMethodExtractorImpl<IdClassWithOnlyAnnotatedHashKeyMethod>(
-				IdClassWithOnlyAnnotatedHashKeyMethod.class);
+		assertEquals(PlaylistId.class, playlistIdMetadata.getJavaType());
 
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testConstruct_WhenHashKeyMethodDoesNotExist_WhenRangeKeyMethodExists() {
-		idClassWithOnlyRangeKeyMethodMetadata = new DynamoDBHashAndRangeKeyMethodExtractorImpl<IdClassWithOnlyAnnotatedRangeKeyMethod>(
-				IdClassWithOnlyAnnotatedRangeKeyMethod.class);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testConstruct_WhenMultipleHashKeyMethodsExist() {
-		idClassWitMultipleAnnotatedHashKeysMetadata = new DynamoDBHashAndRangeKeyMethodExtractorImpl<IdClassWithMulitpleAnnotatedHashKeyMethods>(
-				IdClassWithMulitpleAnnotatedHashKeyMethods.class);
+	@Test
+	void testConstruct_WhenHashKeyMethodExists_WhenRangeKeyMethodDoesNotExist() {
+		assertThatThrownBy(() -> new DynamoDBHashAndRangeKeyMethodExtractorImpl<IdClassWithOnlyAnnotatedHashKeyMethod>(
+				IdClassWithOnlyAnnotatedHashKeyMethod.class)).isInstanceOf(IllegalArgumentException.class);
 
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testGetConstruct_WhenMultipleRangeKeyMethodsExist() {
-		idClassWitMultipleAnnotatedRangeKeysMetadata = new DynamoDBHashAndRangeKeyMethodExtractorImpl<IdClassWithMulitpleAnnotatedRangeKeyMethods>(
-				IdClassWithMulitpleAnnotatedRangeKeyMethods.class);
+	@Test
+	void testConstruct_WhenHashKeyMethodDoesNotExist_WhenRangeKeyMethodExists() {
+		assertThatThrownBy(() -> new DynamoDBHashAndRangeKeyMethodExtractorImpl<IdClassWithOnlyAnnotatedRangeKeyMethod>(
+				IdClassWithOnlyAnnotatedRangeKeyMethod.class)).isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	void testConstruct_WhenMultipleHashKeyMethodsExist() {
+		assertThatThrownBy(() -> new DynamoDBHashAndRangeKeyMethodExtractorImpl<IdClassWithMulitpleAnnotatedHashKeyMethods>(
+				IdClassWithMulitpleAnnotatedHashKeyMethods.class)).isInstanceOf(IllegalArgumentException.class);
 
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testConstruct_WhenNeitherHashKeyOrRangeKeyMethodExist() {
-		idClassWithNoHashOrRangeKeyMethodMetadata = new DynamoDBHashAndRangeKeyMethodExtractorImpl<IdClassWithNoAnnotatedMethods>(
-				IdClassWithNoAnnotatedMethods.class);
+	@Test
+	void testGetConstruct_WhenMultipleRangeKeyMethodsExist() {
+		assertThatThrownBy(() -> new DynamoDBHashAndRangeKeyMethodExtractorImpl<IdClassWithMulitpleAnnotatedRangeKeyMethods>(
+				IdClassWithMulitpleAnnotatedRangeKeyMethods.class)).isInstanceOf(IllegalArgumentException.class);
+
+	}
+
+	@Test
+	void testConstruct_WhenNeitherHashKeyOrRangeKeyMethodExist() {
+		assertThatThrownBy(() -> new DynamoDBHashAndRangeKeyMethodExtractorImpl<IdClassWithNoAnnotatedMethods>(
+				IdClassWithNoAnnotatedMethods.class)).isInstanceOf(IllegalArgumentException.class);
 
 	}
 

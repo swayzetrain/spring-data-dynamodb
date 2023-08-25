@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,19 @@
  */
 package org.socialsignin.spring.data.dynamodb.mapping;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.socialsignin.spring.data.dynamodb.repository.DynamoDBHashAndRangeKey;
+import org.springframework.data.annotation.Id;
+
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIgnore;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.socialsignin.spring.data.dynamodb.repository.DynamoDBHashAndRangeKey;
-import org.springframework.data.annotation.Id;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 
 /**
  * Unit tests for {@link DynamoDBMappingContext}.
@@ -38,8 +35,8 @@ import static org.junit.Assert.assertThat;
  * @author Michael Lavelle
  * @author Sebastian Just
  */
-@RunWith(MockitoJUnitRunner.class)
-public class DynamoDBMappingContextTest {
+@ExtendWith(MockitoExtension.class)
+class DynamoDBMappingContextTest {
 	@DynamoDBTable(tableName = "a")
 	static class DynamoDBMappingContextTestFieldEntity {
 
@@ -84,39 +81,38 @@ public class DynamoDBMappingContextTest {
 
 	private DynamoDBMappingContext underTest;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		underTest = new DynamoDBMappingContext();
 	}
 
 	@Test
-	public void detectsPropertyAnnotation() {
+	void detectsPropertyAnnotation() {
 
 		DynamoDBPersistentEntityImpl<?> entity = underTest
 				.getPersistentEntity(DynamoDBMappingContextTestFieldEntity.class);
 
 		assertNotNull(entity);
-		assertThat(entity.getIdProperty(), is(notNullValue()));
+		assertNotNull(entity.getIdProperty());
 	}
 
 	@Test
-	@Ignore
-	public void detectdMethodsAnnotation() {
+	void detectdMethodsAnnotation() {
 		DynamoDBPersistentEntityImpl<?> entity = underTest
 				.getPersistentEntity(DynamoDBMappingContextTestMethodEntity.class);
 
 		assertNotNull(entity);
-		assertThat(entity.getIdProperty(), is(notNullValue()));
+		assertNotNull(entity.getIdProperty());
 
 	}
 
 	@Test
-	public void detectdMethodsId() {
+	void detectdMethodsId() {
 		DynamoDBPersistentEntityImpl<?> entity = underTest
 				.getPersistentEntity(DynamoDBMappingContextTestIdEntity.class);
 
 		assertNotNull(entity);
-		assertThat(entity.getIdProperty(), is(notNullValue()));
+		assertNotNull(entity.getIdProperty());
 
 	}
 }

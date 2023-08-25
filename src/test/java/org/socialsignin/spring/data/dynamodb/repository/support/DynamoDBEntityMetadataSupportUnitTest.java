@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,31 @@
  */
 package org.socialsignin.spring.data.dynamodb.repository.support;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMarshaller;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.socialsignin.spring.data.dynamodb.domain.sample.User;
 
-@RunWith(MockitoJUnitRunner.class)
-public class DynamoDBEntityMetadataSupportUnitTest {
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMarshaller;
+
+@ExtendWith(MockitoExtension.class)
+class DynamoDBEntityMetadataSupportUnitTest {
 
 	@Test
-	public void testGetMarshallerForProperty_WhenAnnotationIsOnField_AndReturnsDynamoDBMarshaller() {
+	void testGetMarshallerForProperty_WhenAnnotationIsOnField_AndReturnsDynamoDBMarshaller() {
 		DynamoDBEntityMetadataSupport<User, ?> support = new DynamoDBEntityMetadataSupport<>(User.class);
 		@SuppressWarnings("deprecation")
 		DynamoDBMarshaller<?> fieldAnnotation = support.getMarshallerForProperty("joinYear");
-		Assert.assertNotNull(fieldAnnotation);
+		assertNotNull(fieldAnnotation);
 	}
 
 	@Test
-	public void testGetMarshallerForProperty_WhenAnnotationIsOnMethod_AndReturnsDynamoDBMarshaller() {
+	void testGetMarshallerForProperty_WhenAnnotationIsOnMethod_AndReturnsDynamoDBMarshaller() {
 		DynamoDBEntityMetadataSupport<User, ?> support = new DynamoDBEntityMetadataSupport<>(User.class);
 		@SuppressWarnings("deprecation")
 		DynamoDBMarshaller<?> methodAnnotation = support.getMarshallerForProperty("leaveDate");
-		Assert.assertNotNull(methodAnnotation);
+		assertNotNull(methodAnnotation);
 	}
 }

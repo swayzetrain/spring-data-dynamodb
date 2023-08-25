@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public class DynamoDBQueryLookupStrategy {
 				ProjectionFactory factory, Class<T> entityClass, Class<ID> idClass, NamedQueries namedQueries) {
 			try {
 				return new PartTreeDynamoDBQuery<T, ID>(dynamoDBOperations,
-						new DynamoDBQueryMethod<T, ID>(method, metadata, factory));
+						new DynamoDBQueryMethod<>(method, metadata, factory));
 			} catch (IllegalArgumentException e) {
 				throw new IllegalArgumentException(
 						String.format("Could not create query metamodel for method %s!", method.toString()), e);

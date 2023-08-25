@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,16 @@
  */
 package org.socialsignin.spring.data.dynamodb.repository.support;
 
+import java.io.Serializable;
+
 import org.socialsignin.spring.data.dynamodb.core.DynamoDBOperations;
 import org.socialsignin.spring.data.dynamodb.mapping.DynamoDBMappingContext;
 import org.socialsignin.spring.data.dynamodb.repository.util.DynamoDBMappingContextProcessor;
 import org.socialsignin.spring.data.dynamodb.repository.util.Entity2DynamoDBTableSynchronizer;
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.core.support.RepositoryFactoryBeanSupport;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
-
-import java.io.Serializable;
 
 /**
  * Special adapter for Springs
@@ -59,23 +59,23 @@ public class DynamoDBRepositoryFactoryBean<T extends Repository<S, ID>, S, ID ex
 		return dynamoDBRepositoryFactory;
 	}
 
-	@Required
+	@Autowired
 	public void setDynamoDBMappingContextProcessor(
 			DynamoDBMappingContextProcessor<S, ID> dynamoDBMappingContextProcessor) {
 		this.dynamoDBMappingContextProcessor = dynamoDBMappingContextProcessor;
 	}
 
-	@Required
+	@Autowired
 	public void setEntity2DynamoDBTableSynchronizer(Entity2DynamoDBTableSynchronizer<S, ID> tableSynchronizer) {
 		this.tableSynchronizer = tableSynchronizer;
 	}
 
-	@Required
+	@Autowired
 	public void setDynamoDBOperations(DynamoDBOperations dynamoDBOperations) {
 		this.dynamoDBOperations = dynamoDBOperations;
 	}
 
-	@Required
+	@Autowired
 	public void setDynamoDBMappingContext(DynamoDBMappingContext dynamoDBMappingContext) {
 		setMappingContext(dynamoDBMappingContext);
 	}

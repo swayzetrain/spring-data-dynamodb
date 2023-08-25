@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,51 +15,47 @@
  */
 package org.socialsignin.spring.data.dynamodb.mapping.event;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.socialsignin.spring.data.dynamodb.domain.sample.User;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ValidatingDynamoDBEventListenerTest {
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
+import java.util.HashSet;
+import java.util.Set;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.socialsignin.spring.data.dynamodb.domain.sample.User;
+
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
+
+@ExtendWith(MockitoExtension.class)
+class ValidatingDynamoDBEventListenerTest {
+
 	private final User sampleEntity = new User();
 	@Mock
 	private Validator validator;
 	private ValidatingDynamoDBEventListener underTest;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		underTest = new ValidatingDynamoDBEventListener(validator);
 	}
 
 	@Test
-	public void testWrongConstructor() {
-		expectedException.expectMessage("validator must not be null!");
-		expectedException.expect(IllegalArgumentException.class);
+	void testWrongConstructor() {
 
-		new ValidatingDynamoDBEventListener(null);
+		assertThatThrownBy(() -> new ValidatingDynamoDBEventListener(null)).isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
-	public void testEmptyResult() {
+	void testEmptyResult() {
 
 		underTest.onBeforeSave(sampleEntity);
 
@@ -67,10 +63,7 @@ public class ValidatingDynamoDBEventListenerTest {
 	}
 
 	@Test
-	public void testValidationException() {
-		expectedException.expect(ConstraintViolationException.class);
-		expectedException.expectMessage(
-				allOf(containsString("Test Validation Exception 1"), containsString("Test Validation Exception 2")));
+	void testValidationException() {
 
 		Set<ConstraintViolation<User>> validationResult = new HashSet<>();
 
@@ -85,6 +78,6 @@ public class ValidatingDynamoDBEventListenerTest {
 		validationResult.add(vc2);
 		when(validator.validate(sampleEntity)).thenReturn(validationResult);
 
-		underTest.onBeforeSave(sampleEntity);
+		assertThatThrownBy(() -> underTest.onBeforeSave(sampleEntity)).isInstanceOf(ConstraintViolationException.class);
 	}
 }

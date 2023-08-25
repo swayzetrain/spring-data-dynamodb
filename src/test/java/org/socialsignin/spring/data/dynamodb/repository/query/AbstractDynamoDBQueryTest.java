@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  */
 package org.socialsignin.spring.data.dynamodb.repository.query;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -30,12 +30,12 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.socialsignin.spring.data.dynamodb.core.DynamoDBOperations;
 import org.socialsignin.spring.data.dynamodb.domain.sample.User;
 import org.socialsignin.spring.data.dynamodb.query.Query;
@@ -47,8 +47,8 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.util.TypeInformation;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AbstractDynamoDBQueryTest {
+@ExtendWith(MockitoExtension.class)
+class AbstractDynamoDBQueryTest {
 
 	public interface UserRepository extends CrudRepository<User, String> {
 		Page<User> findByName(String name, Pageable pageable);
@@ -115,7 +115,7 @@ public class AbstractDynamoDBQueryTest {
 	@Mock
 	private ProjectionFactory factory;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		doReturn(Page.class).when(typeInformation).getType();
 		doReturn(typeInformation).when(metadata)
@@ -135,7 +135,7 @@ public class AbstractDynamoDBQueryTest {
 	}
 
 	@Test
-	public void testPaged() throws NoSuchMethodException, SecurityException {
+	void testPaged() throws NoSuchMethodException, SecurityException {
 		long total = 1;
 		resultsRestrictionIfApplicable = 1;
 		List<User> content = generateContent(total);
@@ -151,15 +151,15 @@ public class AbstractDynamoDBQueryTest {
 
 		Object actual = underTest.execute(new Object[]{"testName", PageRequest.of(0, 10)});
 
-		assertThat(actual, instanceOf(Page.class));
+		assertThat(actual).isInstanceOf(Page.class);
 		Page<User> actualPage = (Page<User>) actual;
 
 		assertEquals(1, actualPage.getTotalElements());
-		assertThat(content, is(actualPage.getContent()));
+		assertEquals(content, actualPage.getContent());
 	}
 
 	@Test
-	public void testUnpaged() throws NoSuchMethodException, SecurityException {
+	void testUnpaged() throws NoSuchMethodException, SecurityException {
 		long total = 1;
 		List<User> content = spy(generateContent(total));
 
@@ -174,11 +174,11 @@ public class AbstractDynamoDBQueryTest {
 
 		Object actual = underTest.execute(new Object[]{"testName", Pageable.unpaged()});
 
-		assertThat(actual, instanceOf(Page.class));
+		assertThat(actual).isInstanceOf(Page.class);
 		Page<User> actualPage = (Page<User>) actual;
 
 		assertEquals(1, actualPage.getTotalElements());
-		assertThat(content, is(actualPage.getContent()));
+		assertEquals(content, actualPage.getContent());
 		// There should be never an index access to the list - just iterator access to
 		// ensure that lazy loading behavior of the AWS list implementation is kept
 		// intact

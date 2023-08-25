@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ import org.slf4j.LoggerFactory;
 import org.socialsignin.spring.data.dynamodb.core.DynamoDBOperations;
 import org.springframework.data.repository.cdi.CdiRepositoryExtensionSupport;
 
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.UnsatisfiedResolutionException;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.ProcessBean;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.UnsatisfiedResolutionException;
+import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.ProcessBean;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -49,11 +49,11 @@ public class DynamoDBRepositoryExtension extends CdiRepositoryExtensionSupport {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DynamoDBRepositoryExtension.class);
 
-	private final Map<Set<Annotation>, Bean<AmazonDynamoDB>> amazonDynamoDBs = new HashMap<Set<Annotation>, Bean<AmazonDynamoDB>>();
+	private final Map<Set<Annotation>, Bean<AmazonDynamoDB>> amazonDynamoDBs = new HashMap<>();
 
-	private final Map<Set<Annotation>, Bean<DynamoDBOperations>> dynamoDBOperationss = new HashMap<Set<Annotation>, Bean<DynamoDBOperations>>();
+	private final Map<Set<Annotation>, Bean<DynamoDBOperations>> dynamoDBOperationss = new HashMap<>();
 
-	private final Map<Set<Annotation>, Bean<DynamoDBMapperConfig>> dbMapperConfigs = new HashMap<Set<Annotation>, Bean<DynamoDBMapperConfig>>();
+	private final Map<Set<Annotation>, Bean<DynamoDBMapperConfig>> dbMapperConfigs = new HashMap<>();
 
 	private final Map<Set<Annotation>, Bean<DynamoDBMapper>> dbMapper = new HashMap<>();
 	public DynamoDBRepositoryExtension() {
@@ -76,7 +76,7 @@ public class DynamoDBRepositoryExtension extends CdiRepositoryExtensionSupport {
 		for (Type type : bean.getTypes()) {
 			// Check if the bean is a AmazonDynamoDB
 			if (type instanceof Class<?> && AmazonDynamoDBClient.class.isAssignableFrom((Class<?>) type)) {
-				Set<Annotation> qualifiers = new HashSet<Annotation>(bean.getQualifiers());
+				Set<Annotation> qualifiers = new HashSet<>(bean.getQualifiers());
 				if (bean.isAlternative() || !amazonDynamoDBs.containsKey(qualifiers)) {
 					LOGGER.debug("Discovered '{}' with qualifiers {}.", AmazonDynamoDB.class.getName(), qualifiers);
 					amazonDynamoDBs.put(qualifiers, (Bean<AmazonDynamoDB>) bean);
@@ -84,7 +84,7 @@ public class DynamoDBRepositoryExtension extends CdiRepositoryExtensionSupport {
 			}
 			// Check if the bean is a DynamoDBMapperConfig
 			if (type instanceof Class<?> && DynamoDBMapperConfig.class.isAssignableFrom((Class<?>) type)) {
-				Set<Annotation> qualifiers = new HashSet<Annotation>(bean.getQualifiers());
+				Set<Annotation> qualifiers = new HashSet<>(bean.getQualifiers());
 				if (bean.isAlternative() || !dbMapperConfigs.containsKey(qualifiers)) {
 					LOGGER.debug("Discovered '{}' with qualifiers {}.", DynamoDBMapperConfig.class.getName(),
 							qualifiers);
@@ -92,7 +92,7 @@ public class DynamoDBRepositoryExtension extends CdiRepositoryExtensionSupport {
 				}
 			}
 			if (type instanceof Class<?> && DynamoDBMapper.class.isAssignableFrom((Class<?>) type)) {
-				Set<Annotation> qualifiers = new HashSet<Annotation>(bean.getQualifiers());
+				Set<Annotation> qualifiers = new HashSet<>(bean.getQualifiers());
 				if (bean.isAlternative() || !dbMapper.containsKey(qualifiers)) {
 					LOGGER.debug("Discovered '{}' with qualifiers {}.", DynamoDBMapper.class.getName(),
 							qualifiers);
@@ -158,7 +158,7 @@ public class DynamoDBRepositoryExtension extends CdiRepositoryExtensionSupport {
 		Bean<DynamoDBMapper> dynamoDBMapperBean = dbMapper.get(qualifiers);
 
 		// Construct and return the repository bean.
-		return new DynamoDBRepositoryBean<T>(beanManager, amazonDynamoDBBean, dynamoDBMapperConfigBean,
+		return new DynamoDBRepositoryBean<>(beanManager, amazonDynamoDBBean, dynamoDBMapperConfigBean,
 				dynamoDBOperationsBean, dynamoDBMapperBean, qualifiers, repositoryType);
 	}
 }

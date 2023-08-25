@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,21 @@
  */
 package org.socialsignin.spring.data.dynamodb.config;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.socialsignin.spring.data.dynamodb.config.BeanNames.MAPPING_CONTEXT_BEAN_NAME;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.socialsignin.spring.data.dynamodb.mapping.DynamoDBMappingContext;
 import org.socialsignin.spring.data.dynamodb.mapping.event.AuditingEventListener;
 import org.springframework.beans.factory.parsing.ProblemReporter;
@@ -42,16 +49,8 @@ import org.springframework.core.io.Resource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.socialsignin.spring.data.dynamodb.config.BeanNames.MAPPING_CONTEXT_BEAN_NAME;
-
-@RunWith(MockitoJUnitRunner.class)
-public class DynamoDBAuditingBeanDefinitionParserTest {
+@ExtendWith(MockitoExtension.class)
+class DynamoDBAuditingBeanDefinitionParserTest {
 
 	private DynamoDBAuditingBeanDefinitionParser underTest;
 	private Document configXmlDoc;
@@ -82,8 +81,8 @@ public class DynamoDBAuditingBeanDefinitionParserTest {
 	private NamespaceHandlerResolver namespaceHandlerResolver;
 	private DocumentDefaultsDefinition documentDefaultsDefinition;
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	void setUp() throws Exception {
 		underTest = new DynamoDBAuditingBeanDefinitionParser();
 
 		DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -96,31 +95,23 @@ public class DynamoDBAuditingBeanDefinitionParserTest {
 		readerContext = new XmlReaderContext(resource, problemReporter, eventListener, sourceExtractor, reader,
 				namespaceHandlerResolver);
 		parserContext = new ParserContext(readerContext, beanDefinitionParserDelegate);
-
-		when(beanDefinitionParserDelegate.getDefaults()).thenReturn(documentDefaultsDefinition);
-		when(beanNameGenerator.generateBeanName(any(), eq(registry))).thenReturn("dynamoDBMappingContext");
 	}
 
 	@Test
-	public void testGetBeanClass() {
-		Element element = null;
-		Class<?> actual = underTest.getBeanClass(element);
+	void testShouldGenerateId() {
 
-		assertEquals(AuditingEventListener.class, actual);
+		assertThat(underTest.shouldGenerateId()).isTrue();
 	}
 
 	@Test
-	public void testShouldGenerateId() {
-
-		assertTrue(underTest.shouldGenerateId());
-	}
-
-	@Test
-	public void testDoParseWithMappingContext() {
+	void testDoParseWithMappingContext() {
 
 		String mappingContextRef = MAPPING_CONTEXT_BEAN_NAME;
 		Element configElement = configXmlDoc.createElement("config");
 		configElement.setAttribute("mapping-context-ref", mappingContextRef);
+		
+		when(beanDefinitionParserDelegate.getDefaults()).thenReturn(documentDefaultsDefinition);
+		when(beanNameGenerator.generateBeanName(any(), eq(registry))).thenReturn("dynamoDBMappingContext");
 
 		underTest.doParse(configElement, parserContext, builder);
 
@@ -128,13 +119,15 @@ public class DynamoDBAuditingBeanDefinitionParserTest {
 	}
 
 	@Test
-	public void testDoParseWithoutMappingContextAutocreatingBean() {
+	void testDoParseWithoutMappingContextAutocreatingBean() {
 		// mappingContextRef not set
 		String mappingContextRef = null;
 		Element configElement = configXmlDoc.createElement("config");
 		configElement.setAttribute("mapping-context-ref", mappingContextRef);
 
 		// Default bean not yet registered
+		when(beanDefinitionParserDelegate.getDefaults()).thenReturn(documentDefaultsDefinition);
+		when(beanNameGenerator.generateBeanName(any(), eq(registry))).thenReturn("dynamoDBMappingContext");
 		when(registry.containsBeanDefinition(MAPPING_CONTEXT_BEAN_NAME)).thenReturn(false);
 
 		underTest.doParse(configElement, parserContext, builder);
@@ -146,13 +139,15 @@ public class DynamoDBAuditingBeanDefinitionParserTest {
 	}
 
 	@Test
-	public void testDoParseWithoutMappingContextReusingBean() {
+	void testDoParseWithoutMappingContextReusingBean() {
 		// mappingContextRef not set
 		String mappingContextRef = null;
 		Element configElement = configXmlDoc.createElement("config");
 		configElement.setAttribute("mapping-context-ref", mappingContextRef);
 
 		// Default bean not yet registered
+		when(beanDefinitionParserDelegate.getDefaults()).thenReturn(documentDefaultsDefinition);
+		when(beanNameGenerator.generateBeanName(any(), eq(registry))).thenReturn("dynamoDBMappingContext");
 		when(registry.containsBeanDefinition(MAPPING_CONTEXT_BEAN_NAME)).thenReturn(true);
 
 		underTest.doParse(configElement, parserContext, builder);

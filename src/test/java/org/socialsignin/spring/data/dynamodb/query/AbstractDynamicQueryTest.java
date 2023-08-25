@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,21 @@
  */
 package org.socialsignin.spring.data.dynamodb.query;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.socialsignin.spring.data.dynamodb.core.DynamoDBOperations;
-import org.socialsignin.spring.data.dynamodb.domain.sample.User;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.socialsignin.spring.data.dynamodb.core.DynamoDBOperations;
+import org.socialsignin.spring.data.dynamodb.domain.sample.User;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AbstractDynamicQueryTest {
+@ExtendWith(MockitoExtension.class)
+class AbstractDynamicQueryTest {
 
 	private static class QueryTest<T> extends AbstractDynamicQuery<T> {
 		public QueryTest(DynamoDBOperations dynamoDBOperations, Class<T> clazz) {
@@ -51,13 +51,13 @@ public class AbstractDynamicQueryTest {
 	private DynamoDBOperations dynamoDBOperations;
 	private AbstractQuery<User> underTest;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		underTest = new QueryTest<>(dynamoDBOperations, User.class);
 	}
 
 	@Test
-	public void testSetter() {
+	void testSetter() {
 		assertFalse(underTest.isScanCountEnabled());
 		assertFalse(underTest.isScanEnabled());
 

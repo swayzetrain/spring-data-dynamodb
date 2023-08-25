@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,11 @@
  */
 package org.socialsignin.spring.data.dynamodb.core;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.socialsignin.spring.data.dynamodb.domain.sample.CustomerHistory;
 import org.socialsignin.spring.data.dynamodb.domain.sample.CustomerHistoryRepository;
 import org.socialsignin.spring.data.dynamodb.repository.config.EnableDynamoDBRepositories;
@@ -27,16 +30,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.MethodMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
 @ContextConfiguration(classes = {CustomerHistoryTest.TestAppConfig.class, DynamoDBLocalResource.class})
 @TestPropertySource(properties = {"spring.data.dynamodb.entity2ddl.auto=create"})
-public class CustomerHistoryTest {
+class CustomerHistoryTest {
 
 	@Configuration
 	@EnableDynamoDBRepositories(basePackages = "org.socialsignin.spring.data.dynamodb.domain.sample")
@@ -47,7 +47,7 @@ public class CustomerHistoryTest {
 	CustomerHistoryRepository customerHistoryRepository;
 
 	@Test
-	public void saveAndGSITest() {
+	void saveAndGSITest() {
 
 		CustomerHistory expected = new CustomerHistory();
 		expected.setId("customerId");

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,24 @@
  */
 package org.socialsignin.spring.data.dynamodb.repository.config;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig.TableNameOverride;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
 
-@RunWith(MockitoJUnitRunner.class)
-public class DynamoDBMapperConfigFactoryTest {
+
+@ExtendWith(MockitoExtension.class)
+class DynamoDBMapperConfigFactoryTest {
 
 	@Mock
 	private DynamoDBMapper dynamoDBMapper;
@@ -40,13 +43,13 @@ public class DynamoDBMapperConfigFactoryTest {
 
 	DynamoDBMapperConfigFactory underTest;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		underTest = new DynamoDBMapperConfigFactory();
 	}
 
 	@Test
-	public void testGetOverriddenTableName_WithTableNameResolver_defaultConfig() {
+	void testGetOverriddenTableName_WithTableNameResolver_defaultConfig() {
 
 		DynamoDBMapperConfig actual = (DynamoDBMapperConfig) underTest
 				.postProcessAfterInitialization(DynamoDBMapperConfig.DEFAULT, null);
@@ -55,7 +58,7 @@ public class DynamoDBMapperConfigFactoryTest {
 	}
 
 	@Test
-	public void testGetOverriddenTableName_WithTableNameResolver_defaultBuilder() {
+	void testGetOverriddenTableName_WithTableNameResolver_defaultBuilder() {
 		final String overridenTableName = "someOtherTableName";
 
 		DynamoDBMapperConfig.Builder builder = new DynamoDBMapperConfig.Builder();
@@ -72,7 +75,7 @@ public class DynamoDBMapperConfigFactoryTest {
 	}
 
 	@Test
-	public void testGetOverriddenTableName_WithTableNameResolver_emptyBuilder() {
+	void testGetOverriddenTableName_WithTableNameResolver_emptyBuilder() {
 		final String overridenTableName = "someOtherTableName";
 
 		DynamoDBMapperConfig.Builder builder = DynamoDBMapperConfig.builder();

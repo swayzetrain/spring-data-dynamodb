@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,21 @@
  */
 package org.socialsignin.spring.data.dynamodb.query;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.socialsignin.spring.data.dynamodb.core.DynamoDBOperations;
-import org.socialsignin.spring.data.dynamodb.domain.sample.User;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.socialsignin.spring.data.dynamodb.core.DynamoDBOperations;
+import org.socialsignin.spring.data.dynamodb.domain.sample.User;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CountByHashKeyQueryTest {
+@ExtendWith(MockitoExtension.class)
+class CountByHashKeyQueryTest {
 	private static final Class<User> DOMAIN_CLASS = User.class;
 	@Mock
 	private DynamoDBOperations dynamoDBOperations;
@@ -38,14 +38,14 @@ public class CountByHashKeyQueryTest {
 	private Object hashKey;
 	private CountByHashKeyQuery<User> underTest;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		hashKey = ThreadLocalRandom.current().nextLong();
 		underTest = new CountByHashKeyQuery<>(dynamoDBOperations, DOMAIN_CLASS, hashKey);
 	}
 
 	@Test
-	public void testGetSingleResultExists() {
+	void testGetSingleResultExists() {
 		when(dynamoDBOperations.load(DOMAIN_CLASS, hashKey)).thenReturn(sampleEntity);
 		Long actual = underTest.getSingleResult();
 
@@ -53,7 +53,7 @@ public class CountByHashKeyQueryTest {
 	}
 
 	@Test
-	public void testGetSingleResultDoesntExist() {
+	void testGetSingleResultDoesntExist() {
 		when(dynamoDBOperations.load(DOMAIN_CLASS, hashKey)).thenReturn(null);
 		Long actual = underTest.getSingleResult();
 

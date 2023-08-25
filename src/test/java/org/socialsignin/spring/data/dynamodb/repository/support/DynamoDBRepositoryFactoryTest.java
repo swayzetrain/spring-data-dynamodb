@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,28 @@
  */
 package org.socialsignin.spring.data.dynamodb.repository.support;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
 
-public class DynamoDBRepositoryFactoryTest {
+
+
+class DynamoDBRepositoryFactoryTest {
 
 	@Test
-	public void testVersionNullNull() {
+	void testVersionNullNull() {
 		assertFalse(DynamoDBRepositoryFactory.isCompatible(null, null));
 	}
 
 	@Test
-	public void testVersionNullValue() {
+	void testVersionNullValue() {
 		assertFalse(DynamoDBRepositoryFactory.isCompatible(null, "1.0."));
 		assertFalse(DynamoDBRepositoryFactory.isCompatible("1.0", null));
 	}
 
 	@Test
-	public void testVersionCompatible() {
+	void testVersionCompatible() {
 		assertTrue(DynamoDBRepositoryFactory.isCompatible("1.0", "1.0"));
 		assertTrue(DynamoDBRepositoryFactory.isCompatible("1.0.0.0.1", "1.0..0.0.1"));
 

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,13 +106,13 @@ public abstract class AbstractDynamoDBQueryCriteria<T, ID> implements DynamoDBQu
 
 			HashMap<String, Condition> keyConditions = new HashMap<>();
 
-			if (hashKeyConditions != null && hashKeyConditions.size() > 0) {
+			if (hashKeyConditions != null && !hashKeyConditions.isEmpty()) {
 				for (Condition hashKeyCondition : hashKeyConditions) {
 					keyConditions.put(hashKeyAttributeName, hashKeyCondition);
 					allowedSortProperties.add(hashKeyPropertyName);
 				}
 			}
-			if (rangeKeyConditions != null && rangeKeyConditions.size() > 0) {
+			if (rangeKeyConditions != null && !rangeKeyConditions.isEmpty()) {
 				for (Condition rangeKeyCondition : rangeKeyConditions) {
 					keyConditions.put(rangeKeyAttributeName, rangeKeyCondition);
 					allowedSortProperties.add(rangeKeyPropertyName);
@@ -151,17 +151,17 @@ public abstract class AbstractDynamoDBQueryCriteria<T, ID> implements DynamoDBQu
 
 		if(filterExpression.isPresent()) {
 			String filter = filterExpression.get();
-			if(!StringUtils.isEmpty(filter)) {
+			if(StringUtils.hasLength(filter)) {
 				queryRequest.setFilterExpression(filter);
 				if (expressionAttributeNames != null && expressionAttributeNames.length > 0) {
 					for (ExpressionAttribute attribute : expressionAttributeNames) {
-						if(!StringUtils.isEmpty(attribute.key()))
+						if(StringUtils.hasLength(attribute.key()))
 							queryRequest.addExpressionAttributeNamesEntry(attribute.key(), attribute.value());
 					}
 				}
 				if (expressionAttributeValues != null && expressionAttributeValues.length > 0) {
 					for (ExpressionAttribute value : expressionAttributeValues) {
-						if (!StringUtils.isEmpty(value.key())) {
+						if (StringUtils.hasLength(value.key())) {
 							if (mappedExpressionValues.containsKey(value.parameterName())) {
 								queryRequest.addExpressionAttributeValuesEntry(value.key(), new AttributeValue(mappedExpressionValues.get(value.parameterName())));
 							} else {
@@ -590,7 +590,7 @@ public abstract class AbstractDynamoDBQueryCriteria<T, ID> implements DynamoDBQu
 	@SuppressWarnings("deprecation")
 	private List<String> getDateListAsStringList(List<Date> dateList) {
 		DynamoDBMarshaller<Date> marshaller = new Date2IsoDynamoDBMarshaller();
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		for (Date date : dateList) {
 			if (date != null) {
 				list.add(marshaller.marshall(date));

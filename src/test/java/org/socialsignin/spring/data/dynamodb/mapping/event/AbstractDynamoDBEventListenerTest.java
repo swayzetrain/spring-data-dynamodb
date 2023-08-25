@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,31 @@
  */
 package org.socialsignin.spring.data.dynamodb.mapping.event;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
-import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.socialsignin.spring.data.dynamodb.domain.sample.User;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertSame;
-import static org.mockito.Mockito.any;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AbstractDynamoDBEventListenerTest {
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.socialsignin.spring.data.dynamodb.domain.sample.User;
+
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
+
+@ExtendWith(MockitoExtension.class)
+class AbstractDynamoDBEventListenerTest {
 
 	private User sampleEntity = new User();
 	@Mock
@@ -48,35 +52,35 @@ public class AbstractDynamoDBEventListenerTest {
 
 	private AbstractDynamoDBEventListener<User> underTest;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		underTest = Mockito.spy(new AbstractDynamoDBEventListener<User>() {
 		});
 
 		List<User> queryList = new ArrayList<>();
 		queryList.add(sampleEntity);
-		when(sampleQueryList.stream()).thenReturn(queryList.stream());
-		when(sampleScanList.stream()).thenReturn(queryList.stream());
-	}
-
-	@Test(expected = AssertionError.class)
-	public void testNullArgument() {
-		// This is impossible but let's be sure that it is covered
-		when(brokenEvent.getSource()).thenReturn(null);
-
-		underTest.onApplicationEvent(brokenEvent);
-	}
-
-	@Test(expected = AssertionError.class)
-	public void testUnknownEvent() {
-		// Simulate an unknown event
-		when(brokenEvent.getSource()).thenReturn(new User());
-
-		underTest.onApplicationEvent(brokenEvent);
+		lenient().when(sampleQueryList.stream()).thenReturn(queryList.stream());
+		lenient().when(sampleScanList.stream()).thenReturn(queryList.stream());
 	}
 
 	@Test
-	public void testRawType() {
+	void testNullArgument() {
+		// This is impossible but let's be sure that it is covered
+		when(brokenEvent.getSource()).thenReturn(null);
+
+		assertThatThrownBy(() -> underTest.onApplicationEvent(brokenEvent)).isInstanceOf(AssertionError.class);
+	}
+
+	@Test
+	void testUnknownEvent() {
+		// Simulate an unknown event
+		when(brokenEvent.getSource()).thenReturn(new User());
+
+		assertThatThrownBy(() -> underTest.onApplicationEvent(brokenEvent)).isInstanceOf(AssertionError.class);
+	}
+
+	@Test
+	void testRawType() {
 		underTest = Mockito.spy(new AbstractDynamoDBEventListener<User>() {
 		});
 
@@ -84,7 +88,7 @@ public class AbstractDynamoDBEventListenerTest {
 	}
 
 	@Test
-	public void testAfterDelete() {
+	void testAfterDelete() {
 		underTest.onApplicationEvent(new AfterDeleteEvent<>(sampleEntity));
 
 		verify(underTest).onAfterDelete(sampleEntity);
@@ -97,7 +101,7 @@ public class AbstractDynamoDBEventListenerTest {
 	}
 
 	@Test
-	public void testAfterLoad() {
+	void testAfterLoad() {
 		underTest.onApplicationEvent(new AfterLoadEvent<>(sampleEntity));
 
 		verify(underTest, never()).onAfterDelete(any());
@@ -110,7 +114,7 @@ public class AbstractDynamoDBEventListenerTest {
 	}
 
 	@Test
-	public void testAfterQuery() {
+	void testAfterQuery() {
 		underTest.onApplicationEvent(new AfterQueryEvent<>(sampleQueryList));
 
 		verify(underTest, never()).onAfterDelete(any());
@@ -123,7 +127,7 @@ public class AbstractDynamoDBEventListenerTest {
 	}
 
 	@Test
-	public void testAfterSave() {
+	void testAfterSave() {
 		underTest.onApplicationEvent(new AfterSaveEvent<>(sampleEntity));
 
 		verify(underTest, never()).onAfterDelete(any());
@@ -136,7 +140,7 @@ public class AbstractDynamoDBEventListenerTest {
 	}
 
 	@Test
-	public void testAfterScan() {
+	void testAfterScan() {
 		underTest.onApplicationEvent(new AfterScanEvent<>(sampleScanList));
 
 		verify(underTest, never()).onAfterDelete(any());
@@ -149,7 +153,7 @@ public class AbstractDynamoDBEventListenerTest {
 	}
 
 	@Test
-	public void testBeforeDelete() {
+	void testBeforeDelete() {
 		underTest.onApplicationEvent(new BeforeDeleteEvent<>(sampleEntity));
 
 		verify(underTest, never()).onAfterDelete(any());
@@ -162,7 +166,7 @@ public class AbstractDynamoDBEventListenerTest {
 	}
 
 	@Test
-	public void testBeforeSave() {
+	void testBeforeSave() {
 		underTest.onApplicationEvent(new BeforeSaveEvent<>(sampleEntity));
 
 		verify(underTest, never()).onAfterDelete(any());

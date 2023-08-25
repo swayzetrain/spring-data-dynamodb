@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,28 +15,26 @@
  */
 package org.socialsignin.spring.data.dynamodb.repository.query;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.socialsignin.spring.data.dynamodb.core.DynamoDBOperations;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.data.repository.query.QueryLookupStrategy.Key;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-
-@RunWith(MockitoJUnitRunner.class)
-public class DynamoDBQueryLookupStrategyTest {
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
+@ExtendWith(MockitoExtension.class)
+class DynamoDBQueryLookupStrategyTest {
+	
 	@Mock
 	private DynamoDBOperations dynamoDBOperations;
 
 	@Test
-	public void testCreate() {
+	void testCreate() {
 		QueryLookupStrategy actual;
 		actual = DynamoDBQueryLookupStrategy.create(dynamoDBOperations, Key.CREATE);
 		assertNotNull(actual);
@@ -46,7 +44,7 @@ public class DynamoDBQueryLookupStrategyTest {
 	}
 
 	@Test
-	public void testNull() {
+	void testNull() {
 		QueryLookupStrategy actualNull = DynamoDBQueryLookupStrategy.create(dynamoDBOperations, null);
 		QueryLookupStrategy actualCreate = DynamoDBQueryLookupStrategy.create(dynamoDBOperations, Key.CREATE);
 
@@ -54,11 +52,8 @@ public class DynamoDBQueryLookupStrategyTest {
 	}
 
 	@Test
-	public void testDeclaredQuery() {
-		expectedException.expect(IllegalArgumentException.class);
-		expectedException.expectMessage("Unsupported query lookup strategy USE_DECLARED_QUERY!");
-
-		DynamoDBQueryLookupStrategy.create(dynamoDBOperations, Key.USE_DECLARED_QUERY);
+	void testDeclaredQuery() {
+		assertThatThrownBy(() -> DynamoDBQueryLookupStrategy.create(dynamoDBOperations, Key.USE_DECLARED_QUERY)).isInstanceOf(IllegalArgumentException.class);
 	}
 
 }

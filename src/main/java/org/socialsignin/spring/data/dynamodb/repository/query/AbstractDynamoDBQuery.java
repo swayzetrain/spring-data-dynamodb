@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -293,7 +293,7 @@ public abstract class AbstractDynamoDBQuery<T, ID> implements RepositoryQuery, E
 				return dynamoDBQuery.doCreateCountQueryWithPermissions(values, false).getSingleResult();
 			} else {
 				List<T> resultList = dynamoDBQuery.doCreateQueryWithPermissions(values).getResultList();
-				return resultList.size() == 0 ? null : resultList.get(0);
+				return resultList.isEmpty() ? null : resultList.get(0);
 
 			}
 

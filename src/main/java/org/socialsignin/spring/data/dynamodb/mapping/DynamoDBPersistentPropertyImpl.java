@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ class DynamoDBPersistentPropertyImpl extends AnnotationBasedPersistentProperty<D
 
 	static {
 
-		Set<Class<? extends Annotation>> annotations = new HashSet<Class<? extends Annotation>>();
+		Set<Class<? extends Annotation>> annotations = new HashSet<>();
 
 		annotations.add(Reference.class); // Reference not yet supported
 		ASSOCIATION_ANNOTATIONS = Collections.unmodifiableSet(annotations);
@@ -170,6 +170,6 @@ class DynamoDBPersistentPropertyImpl extends AnnotationBasedPersistentProperty<D
 	 */
 	@Override
 	protected Association<DynamoDBPersistentProperty> createAssociation() {
-		return new Association<DynamoDBPersistentProperty>(this, null);
+		return new Association<>(this, null);
 	}
 }

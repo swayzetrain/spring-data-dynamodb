@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,27 @@
  */
 package org.socialsignin.spring.data.dynamodb.mapping;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Comparator;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.socialsignin.spring.data.dynamodb.repository.DynamoDBHashAndRangeKey;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mapping.model.Property;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
 import org.springframework.data.util.ClassTypeInformation;
 
-import java.util.Comparator;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-@RunWith(MockitoJUnitRunner.class)
-public class DynamoDBPersistentEntityTest {
+@ExtendWith(MockitoExtension.class)
+class DynamoDBPersistentEntityTest {
 
 	static class DynamoDBPersistentEntity {
 		@DynamoDBHashKey
@@ -54,13 +55,13 @@ public class DynamoDBPersistentEntityTest {
 			.from(DynamoDBPersistentEntity.class);
 	private DynamoDBPersistentEntityImpl<DynamoDBPersistentEntity> underTest;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		underTest = new DynamoDBPersistentEntityImpl<>(cti, comparator);
 	}
 
 	@Test
-	public void testSomeProperty() throws NoSuchFieldException {
+	void testSomeProperty() throws NoSuchFieldException {
 		Property prop = Property.of(cti, DynamoDBPersistentEntity.class.getDeclaredField("name"));
 
 		DynamoDBPersistentProperty property = new DynamoDBPersistentPropertyImpl(prop, underTest,
@@ -71,7 +72,7 @@ public class DynamoDBPersistentEntityTest {
 	}
 
 	@Test
-	public void testIdProperty() throws NoSuchFieldException {
+	void testIdProperty() throws NoSuchFieldException {
 		Property prop = Property.of(cti, DynamoDBPersistentEntity.class.getDeclaredField("id"));
 		DynamoDBPersistentProperty property = new DynamoDBPersistentPropertyImpl(prop, underTest,
 				SimpleTypeHolder.DEFAULT);
@@ -82,7 +83,7 @@ public class DynamoDBPersistentEntityTest {
 	}
 
 	@Test
-	public void testCompositeIdProperty() throws NoSuchFieldException {
+	void testCompositeIdProperty() throws NoSuchFieldException {
 		Property prop = Property.of(cti, DynamoDBPersistentEntity.class.getDeclaredField("hashRangeKey"));
 		DynamoDBPersistentProperty property = new DynamoDBPersistentPropertyImpl(prop, underTest,
 				SimpleTypeHolder.DEFAULT);

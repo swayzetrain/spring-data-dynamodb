@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class SimpleDynamoDBPagingAndSortingRepository<T, ID> extends SimpleDynam
 		if (pageable.getOffset() > 0) {
 			long processedCount = scanThroughResults(iterator, pageable.getOffset());
 			if (processedCount < pageable.getOffset())
-				return new PageImpl<>(new ArrayList<T>());
+				return new PageImpl<>(new ArrayList<>());
 		}
 		// Scan ahead to retrieve the next page count
 		List<T> results = readPageOfResults(iterator, pageable.getPageSize());

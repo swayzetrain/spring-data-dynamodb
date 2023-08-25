@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+    Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -18,16 +18,16 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.github.boostchicken</groupId>
+    <groupId>io.github.swayzetrain</groupId>
     <artifactId>spring-data-dynamodb</artifactId>
-    <version>5.2.6-SNAPSHOT</version>
+    <version>6.0.0</version>
     <name>Spring Data DynamoDB</name>
     <inceptionYear>2018</inceptionYear>
 
     <description>The primary goal of the Spring® Data project is to make it easier to build Spring-powered applications
         that use data access technologies.
         This module deals with enhanced support for a data access layer built on AWS DynamoDB.</description>
-    <url>https://github.com/boostchicken/spring-data-dynamodb</url>
+    <url>https://github.com/swayzetrain/spring-data-dynamodb</url>
 
     <licenses>
         <license>
@@ -37,23 +37,25 @@
     </licenses>
 
     <properties>
-        <spring.version>5.3.15</spring.version>
-        <spring-data.version>2.4.15</spring-data.version>
+        <spring.version>6.0.11</spring.version>
+        <spring-data.version>3.1.2</spring-data.version>
 
-        <hibernate-validator.version>6.2.2.Final</hibernate-validator.version>
-        <aws-java-sdk.version>1.12.150</aws-java-sdk.version>
-        <junit.version>4.13.2</junit.version>
-        <mockito.version>2.23.0</mockito.version>
-        <cdi.version>2.0</cdi.version>
+        <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
+        <aws-java-sdk.version>1.12.531</aws-java-sdk.version>
+        <junit.version>5.9.3</junit.version>
+        <mockito.version>5.4.0</mockito.version>
+        <cdi.version>4.0.1</cdi.version>
         <slf4j-test.version>1.2.0</slf4j-test.version>
         <sqlite4java.version>1.0.392</sqlite4java.version>
+        <sqlite4java.groupId>com.almworks.sqlite4java</sqlite4java.groupId>
+        <assertj.version>3.24.2</assertj.version>
 
         <findbugs.version>3.0.5</findbugs.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <spring-boot-starter-validation.version>2.6.3</spring-boot-starter-validation.version>
+        <maven.compiler.source>20</maven.compiler.source>
+        <maven.compiler.target>20</maven.compiler.target>
+        <spring-boot-starter-validation.version>3.1.2</spring-boot-starter-validation.version>
     </properties>
 
     <dependencyManagement>
@@ -78,11 +80,11 @@
             </dependency>
 
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
+                <groupId>org.junit.jupiter</groupId>
+    			<artifactId>junit-jupiter-api</artifactId>
                 <version>${junit.version}</version>
             </dependency>
-
+			
 
             <dependency>
                 <groupId>org.mockito</groupId>
@@ -100,12 +102,12 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>DynamoDBLocal</artifactId>
-                <version>[1.11,2.0)</version>
+                <version>[1.21.0,2.0)</version>
             </dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-to-slf4j</artifactId>
-				<version>2.17.1</version>
+				<version>2.20.0</version>
 			</dependency>
 
             <dependency>
@@ -124,13 +126,13 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.12.0</version>
+                <version>3.13.0</version>
             </dependency>
             <!-- uk.org.lidalia:slf4j-test comes with 1.7.5 -->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.30</version>
+                <version>2.0.7</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -169,8 +171,8 @@
 
         <!-- CDI -->
         <dependency>
-            <groupId>javax.enterprise</groupId>
-            <artifactId>cdi-api</artifactId>
+            <groupId>jakarta.enterprise</groupId>
+    		<artifactId>jakarta.enterprise.cdi-api</artifactId>
             <version>${cdi.version}</version>
             <scope>compile</scope>
         </dependency>
@@ -179,6 +181,12 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+        	<groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <version>2.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -192,10 +200,22 @@
 			<scope>test</scope>
 		</dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+    		<artifactId>junit-jupiter-api</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+    		<groupId>org.mockito</groupId>
+    		<artifactId>mockito-junit-jupiter</artifactId>
+    		<version>4.5.1</version>
+    		<scope>test</scope>
+		</dependency>
+        <dependency>
+    		<groupId>org.assertj</groupId>
+    		<artifactId>assertj-core</artifactId>
+    		<version>${assertj.version}</version>
+   			<scope>test</scope>
+		</dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
@@ -231,7 +251,7 @@
                             <configuration>
                                 <rules>
                                     <requireJavaVersion>
-                                        <version>1.8.0</version>
+                                        <version>20</version>
                                     </requireJavaVersion>
                                 </rules>
                             </configuration>
@@ -276,7 +296,7 @@
                         </manifest>
                         <manifestEntries>
                             <Specification-Title>Spring Data</Specification-Title>
-                            <Specification-Version>2.6</Specification-Version>
+                            <Specification-Version>3.1.2</Specification-Version>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -336,7 +356,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.5</version>
+                <version>0.8.10</version>
                 <executions>
                     <execution>
                         <goals>
@@ -396,10 +416,10 @@
                     <configLocation>src/checkstyle.xml</configLocation>
                 </configuration>
             </plugin>
-			<plugin>
+            <plugin>
 				<groupId>com.github.spotbugs</groupId>
 				<artifactId>spotbugs-maven-plugin</artifactId>
-				<version>4.0.4</version>
+				<version>4.7.3.0</version>
 				<configuration>
 					<effort>Max</effort>
 					<!-- Reports all bugs (other values are medium and max) -->
@@ -451,7 +471,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>com.almworks.sqlite4java</groupId>
+                                    <groupId>${sqlite4java.groupId}</groupId>
                                     <artifactId>${sqlite4java.artifactId}</artifactId>
                                     <version>${sqlite4java.version}</version>
                                     <type>${sqlite4java.type}</type>
@@ -498,7 +518,7 @@
     </build>
 
     <scm>
-        <url>https://github.com/boostchicken/spring-data-dynamodb</url>
+        <url>https://github.com/swayzetrain/spring-data-dynamodb</url>
         <connection>scm:git:ssh://github.com/boostchicken/spring-data-dynamodb.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/boostchicken/spring-data-dynamodb.git</developerConnection>
         <tag>HEAD</tag>
@@ -506,25 +526,11 @@
 
     <repositories>
         <repository>
-            <id>spring-libs-snapshot</id>
-            <url>https://repo.springsource.org/libs-snapshot</url>
-        </repository>
-        <repository>
             <id>dynamodb-local-oregon</id>
             <name>DynamoDB Local Release Repository</name>
             <url>https://s3-us-west-2.amazonaws.com/dynamodb-local/release</url>
         </repository>
     </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>com.springsource.repository.bundles.release</id>
-            <url>https://repository.springsource.com/maven/bundles/release</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
 
     <profiles>
         <profile>
@@ -749,7 +755,7 @@
     <distributionManagement>
         <site>
             <id>website</id>
-            <url>https://github.com/boostchicken/spring-data-dynamodb</url>
+            <url>https://github.com/swayzetrain/spring-data-dynamodb</url>
         </site>
         <snapshotRepository>
             <id>ossrh</id>
@@ -764,14 +770,8 @@
 
     <issueManagement>
     	<system>GitHub</system>
-    	<url>https://github.com/boostchicken/spring-data-dynamodb/issues</url>
+    	<url>https://github.com/swayzetrain/spring-data-dynamodb/issues</url>
     </issueManagement>
-
-    <ciManagement>
-        <system>Travis CI</system>
-        <url>https://travis-ci.org/boostchicken/spring-data-dynamodb</url>
-    </ciManagement>
-
 
     <reporting>
         <plugins>

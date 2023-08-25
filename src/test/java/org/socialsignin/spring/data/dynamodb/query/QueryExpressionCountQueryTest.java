@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,23 @@
  */
 package org.socialsignin.spring.data.dynamodb.query;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.socialsignin.spring.data.dynamodb.core.DynamoDBOperations;
-import org.socialsignin.spring.data.dynamodb.domain.sample.User;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.socialsignin.spring.data.dynamodb.core.DynamoDBOperations;
+import org.socialsignin.spring.data.dynamodb.domain.sample.User;
 
-@RunWith(MockitoJUnitRunner.class)
-public class QueryExpressionCountQueryTest {
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
+
+@ExtendWith(MockitoExtension.class)
+class QueryExpressionCountQueryTest {
 	@Mock
 	private DynamoDBOperations dynamoDBOperations;
 	@Mock
@@ -38,13 +39,13 @@ public class QueryExpressionCountQueryTest {
 
 	private QueryExpressionCountQuery<User> underTest;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		underTest = new QueryExpressionCountQuery<>(dynamoDBOperations, User.class, queryExpression);
 	}
 
 	@Test
-	public void testGetSingleResult() {
+	void testGetSingleResult() {
 		int expected = ThreadLocalRandom.current().nextInt();
 		when(dynamoDBOperations.count(User.class, queryExpression)).thenReturn(expected);
 

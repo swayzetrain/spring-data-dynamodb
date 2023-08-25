@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,32 +15,36 @@
  */
 package org.socialsignin.spring.data.dynamodb.mapping.event;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
-import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.socialsignin.spring.data.dynamodb.domain.sample.User;
-import uk.org.lidalia.slf4jext.Level;
-import uk.org.lidalia.slf4jtest.TestLogger;
-import uk.org.lidalia.slf4jtest.TestLoggerFactory;
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.lenient;
+import static uk.org.lidalia.slf4jtest.LoggingEvent.trace;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Arrays.asList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
-import static uk.org.lidalia.slf4jtest.LoggingEvent.trace;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.socialsignin.spring.data.dynamodb.domain.sample.User;
+import org.springframework.beans.factory.annotation.Autowired;
 
-@RunWith(MockitoJUnitRunner.class)
-public class LoggingEventListenerTest {
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
 
+import uk.org.lidalia.slf4jext.Level;
+import uk.org.lidalia.slf4jtest.TestLogger;
+import uk.org.lidalia.slf4jtest.TestLoggerFactory;
+
+@ExtendWith(MockitoExtension.class)
+class LoggingEventListenerTest {
+
+	@Autowired
 	private final TestLogger logger = TestLoggerFactory.getTestLogger(LoggingEventListener.class);
+	
 	private final User sampleEntity = new User();
 	@Mock
 	private PaginatedQueryList<User> sampleQueryList;
@@ -49,70 +53,70 @@ public class LoggingEventListenerTest {
 
 	private LoggingEventListener underTest;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		underTest = new LoggingEventListener();
 
-		logger.setEnabledLevels(Level.TRACE);
+		logger.setEnabledLevelsForAllThreads(Level.TRACE);
 
 		List<User> queryList = new ArrayList<>();
 		queryList.add(sampleEntity);
-		when(sampleQueryList.stream()).thenReturn(queryList.stream());
-		when(sampleScanList.stream()).thenReturn(queryList.stream());
+		lenient().when(sampleQueryList.stream()).thenReturn(queryList.stream());
+		lenient().when(sampleScanList.stream()).thenReturn(queryList.stream());
 	}
 
-	@After
-	public void clearLoggers() {
+	@AfterEach
+	void clearLoggers() {
 		TestLoggerFactory.clear();
 	}
 
 	@Test
-	public void testAfterDelete() {
+	void testAfterDelete() {
 		underTest.onApplicationEvent(new AfterDeleteEvent<>(sampleEntity));
 
-		assertThat(logger.getLoggingEvents(), is(asList(trace("onAfterDelete: {}", sampleEntity))));
+		assertThat(logger.getLoggingEvents()).isEqualTo(asList(trace("onAfterDelete: {}", sampleEntity)));
 	}
 
 	@Test
-	public void testAfterLoad() {
+	void testAfterLoad() {
 		underTest.onApplicationEvent(new AfterLoadEvent<>(sampleEntity));
 
-		assertThat(logger.getLoggingEvents(), is(asList(trace("onAfterLoad: {}", sampleEntity))));
+		assertThat(logger.getLoggingEvents()).isEqualTo(asList(trace("onAfterLoad: {}", sampleEntity)));
 	}
 
 	@Test
-	public void testAfterQuery() {
+	void testAfterQuery() {
 		underTest.onApplicationEvent(new AfterQueryEvent<>(sampleQueryList));
 
-		assertThat(logger.getLoggingEvents(), is(asList(trace("onAfterQuery: {}", sampleEntity))));
+		assertThat(logger.getLoggingEvents()).isEqualTo(asList(trace("onAfterQuery: {}", sampleEntity)));
 	}
 
 	@Test
-	public void testAfterSave() {
+	void testAfterSave() {
 		underTest.onApplicationEvent(new AfterSaveEvent<>(sampleEntity));
 
-		assertThat(logger.getLoggingEvents(), is(asList(trace("onAfterSave: {}", sampleEntity))));
+		assertThat(logger.getLoggingEvents()).isEqualTo(asList(trace("onAfterSave: {}", sampleEntity)));
 	}
 
 	@Test
-	public void testAfterScan() {
+	void testAfterScan() {
 		underTest.onApplicationEvent(new AfterScanEvent<>(sampleScanList));
 
-		assertThat(logger.getLoggingEvents(), is(asList(trace("onAfterScan: {}", sampleEntity))));
+		assertThat(logger.getLoggingEvents()).isEqualTo(asList(trace("onAfterScan: {}", sampleEntity)));
 	}
 
 	@Test
-	public void testBeforeDelete() {
+	void testBeforeDelete() {
 		underTest.onApplicationEvent(new BeforeDeleteEvent<>(sampleEntity));
 
-		assertThat(logger.getLoggingEvents(), is(asList(trace("onBeforeDelete: {}", sampleEntity))));
+		assertThat(logger.getLoggingEvents()).isEqualTo(asList(trace("onBeforeDelete: {}", sampleEntity)));
 	}
 
 	@Test
-	public void testBeforeSave() {
+	void testBeforeSave() {
 		underTest.onApplicationEvent(new BeforeSaveEvent<>(sampleEntity));
 
-		assertThat(logger.getLoggingEvents(), is(asList(trace("onBeforeSave: {}", sampleEntity))));
+		assertThat(logger.getLoggingEvents()).isEqualTo(asList(trace("onBeforeSave: {}", sampleEntity)));
 	}
 
 }

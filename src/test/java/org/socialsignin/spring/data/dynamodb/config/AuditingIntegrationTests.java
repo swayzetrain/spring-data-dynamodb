@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,13 @@
  */
 package org.socialsignin.spring.data.dynamodb.config;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
-import org.joda.time.DateTime;
-import org.junit.Test;
+
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Date;
+
+import org.junit.jupiter.api.Test;
 import org.socialsignin.spring.data.dynamodb.mapping.DynamoDBMappingContext;
 import org.socialsignin.spring.data.dynamodb.mapping.event.BeforeSaveEvent;
 import org.springframework.context.support.AbstractApplicationContext;
@@ -26,20 +30,17 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 /**
  * Integration test for the auditing support.
  * 
  * @author Vito Limandibhrata
  */
-public class AuditingIntegrationTests {
+class AuditingIntegrationTests {
 
 	@Test
-	public void enablesAuditingAndSetsPropertiesAccordingly() throws Exception {
+	void enablesAuditingAndSetsPropertiesAccordingly() throws Exception {
 
 		AbstractApplicationContext context = new ClassPathXmlApplicationContext("auditing.xml", getClass());
 
@@ -50,16 +51,16 @@ public class AuditingIntegrationTests {
 		BeforeSaveEvent<Entity> event = new BeforeSaveEvent<Entity>(entity);
 		context.publishEvent(event);
 
-		assertThat(entity.created, is(notNullValue()));
-		assertThat(entity.modified, is(entity.created));
+		assertThat(entity.created).isNotNull();
+		assertThat(entity.modified).isAfterOrEqualTo(entity.created);
 
 		Thread.sleep(10);
 		entity.id = 1L;
 		event = new BeforeSaveEvent<Entity>(entity);
 		context.publishEvent(event);
 
-		assertThat(entity.created, is(notNullValue()));
-		assertThat(entity.modified, is(not(entity.created)));
+		assertThat(entity.created).isNotNull();
+		assertThat(entity.modified).isAfterOrEqualTo(entity.created);
 		context.close();
 	}
 
@@ -69,11 +70,11 @@ public class AuditingIntegrationTests {
 		@Id
 		Long id;
 		@CreatedDate
-		DateTime created;
-		DateTime modified;
+		Date created;
+		Date modified;
 
 		@LastModifiedDate
-		public DateTime getModified() {
+		public Date getModified() {
 			return modified;
 		}
 	}

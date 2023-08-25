@@ -1,6 +1,6 @@
 <!--
 
-    Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+    Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -23,6 +23,11 @@
     <author>boostchicken</author>
   </properties>
   <body>
+	<release version="6.0.0" description="Maintenance Release">
+		<action dev="swayzetrain" type="add" date="2023-08-22">
+			Upgrade Spring version to 6.x. Update Spring Data to 3.1.2.
+		</action>
+	</release>
     <release version="5.2.5" description="Feature Release">
       <action dev="hannes-angst" type="add" issue="33" date="2020-06-16">
         Allow single object as parameter to query a set/list

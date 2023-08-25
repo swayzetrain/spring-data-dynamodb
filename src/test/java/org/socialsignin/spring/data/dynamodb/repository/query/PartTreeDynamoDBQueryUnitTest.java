@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,36 +15,15 @@
  */
 package org.socialsignin.spring.data.dynamodb.repository.query;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
-import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
-import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
-import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
-import com.amazonaws.services.dynamodbv2.model.Condition;
-import com.amazonaws.services.dynamodbv2.model.QueryRequest;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.socialsignin.spring.data.dynamodb.core.DynamoDBOperations;
-import org.socialsignin.spring.data.dynamodb.domain.sample.DynamoDBYearMarshaller;
-import org.socialsignin.spring.data.dynamodb.domain.sample.Playlist;
-import org.socialsignin.spring.data.dynamodb.domain.sample.PlaylistId;
-import org.socialsignin.spring.data.dynamodb.domain.sample.User;
-import org.socialsignin.spring.data.dynamodb.repository.QueryConstants;
-import org.socialsignin.spring.data.dynamodb.repository.support.DynamoDBEntityInformation;
-import org.socialsignin.spring.data.dynamodb.repository.support.DynamoDBIdIsHashAndRangeKeyEntityInformation;
-import org.springframework.data.repository.query.Parameter;
-import org.springframework.data.repository.query.Parameters;
-import org.springframework.data.repository.query.RepositoryQuery;
-import org.springframework.util.ClassUtils;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -58,12 +37,35 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.socialsignin.spring.data.dynamodb.core.DynamoDBOperations;
+import org.socialsignin.spring.data.dynamodb.domain.sample.DynamoDBYearMarshaller;
+import org.socialsignin.spring.data.dynamodb.domain.sample.Playlist;
+import org.socialsignin.spring.data.dynamodb.domain.sample.PlaylistId;
+import org.socialsignin.spring.data.dynamodb.domain.sample.User;
+import org.socialsignin.spring.data.dynamodb.repository.QueryConstants;
+import org.socialsignin.spring.data.dynamodb.repository.support.DynamoDBEntityInformation;
+import org.socialsignin.spring.data.dynamodb.repository.support.DynamoDBIdIsHashAndRangeKeyEntityInformation;
+import org.springframework.data.repository.query.Parameter;
+import org.springframework.data.repository.query.Parameters;
+import org.springframework.data.repository.query.RepositoryQuery;
+import org.springframework.util.ClassUtils;
 
-@RunWith(MockitoJUnitRunner.class)
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
+import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
+import com.amazonaws.services.dynamodbv2.model.Condition;
+import com.amazonaws.services.dynamodbv2.model.QueryRequest;
+
+@ExtendWith(MockitoExtension.class)
 public class PartTreeDynamoDBQueryUnitTest {
 
 	private RepositoryQuery partTreeDynamoDBQuery;
@@ -105,25 +107,23 @@ public class PartTreeDynamoDBQueryUnitTest {
 	ArgumentCaptor<Class<User>> userClassCaptor;
 	ArgumentCaptor<DynamoDBScanExpression> scanCaptor;
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("unchecked")
-	public void setUp() {
-		Mockito.when(mockPlaylistEntityMetadata.isCompositeHashAndRangeKeyProperty("playlistId")).thenReturn(true);
-		Mockito.when(mockPlaylistEntityMetadata.getHashKeyPropertyName()).thenReturn("userName");
-		// Mockito.when(mockPlaylistEntityMetadata.isHashKeyProperty("userName")).thenReturn(true);
-		Mockito.when(mockPlaylistEntityMetadata.getJavaType()).thenReturn(Playlist.class);
-		Mockito.when(mockPlaylistEntityMetadata.getRangeKeyPropertyName()).thenReturn("playlistName");
-		Mockito.when(mockPlaylistEntityMetadata.getIndexRangeKeyPropertyNames()).thenReturn(new HashSet<String>());
-		Mockito.when(mockDynamoDBUserQueryMethod.getEntityInformation()).thenReturn(mockUserEntityMetadata);
-		Mockito.when(mockDynamoDBUserQueryMethod.getParameters()).thenReturn(mockParameters);
-		Mockito.when(mockDynamoDBUserQueryMethod.getConsistentReadMode()).thenReturn(QueryConstants.ConsistentReadMode.DEFAULT);
-		Mockito.when(mockDynamoDBPlaylistQueryMethod.getEntityInformation()).thenReturn(mockPlaylistEntityMetadata);
-		Mockito.when(mockDynamoDBPlaylistQueryMethod.getParameters()).thenReturn(mockParameters);
-		Mockito.when(mockUserEntityMetadata.getHashKeyPropertyName()).thenReturn("id");
-		// Mockito.when(mockUserEntityMetadata.isHashKeyProperty("id")).thenReturn(true);
-		Mockito.when(mockUserEntityMetadata.getJavaType()).thenReturn(User.class);
-		Mockito.when(mockDynamoDBUserQueryMethod.isScanEnabled()).thenReturn(true);
-		Mockito.when(mockDynamoDBPlaylistQueryMethod.isScanEnabled()).thenReturn(true);
+	void setUp() {
+		lenient().when(mockPlaylistEntityMetadata.isCompositeHashAndRangeKeyProperty("playlistId")).thenReturn(true);
+		lenient().when(mockPlaylistEntityMetadata.getHashKeyPropertyName()).thenReturn("userName");
+		lenient().when(mockPlaylistEntityMetadata.getJavaType()).thenReturn(Playlist.class);
+		lenient().when(mockPlaylistEntityMetadata.getRangeKeyPropertyName()).thenReturn("playlistName");
+		lenient().when(mockPlaylistEntityMetadata.getIndexRangeKeyPropertyNames()).thenReturn(new HashSet<String>());
+		lenient().when(mockDynamoDBUserQueryMethod.getEntityInformation()).thenReturn(mockUserEntityMetadata);
+		lenient().when(mockDynamoDBUserQueryMethod.getParameters()).thenReturn(mockParameters);
+		lenient().when(mockDynamoDBUserQueryMethod.getConsistentReadMode()).thenReturn(QueryConstants.ConsistentReadMode.DEFAULT);
+		lenient().when(mockDynamoDBPlaylistQueryMethod.getEntityInformation()).thenReturn(mockPlaylistEntityMetadata);
+		lenient().when(mockDynamoDBPlaylistQueryMethod.getParameters()).thenReturn(mockParameters);
+		lenient().when(mockUserEntityMetadata.getHashKeyPropertyName()).thenReturn("id");
+		lenient().when(mockUserEntityMetadata.getJavaType()).thenReturn(User.class);
+		lenient().when(mockDynamoDBUserQueryMethod.isScanEnabled()).thenReturn(true);
+		lenient().when(mockDynamoDBPlaylistQueryMethod.isScanEnabled()).thenReturn(true);
 
 		// Mock out specific DynamoDBOperations behavior expected by this method
 		playlistQueryCaptor = ArgumentCaptor.forClass(DynamoDBQueryExpression.class);
@@ -144,9 +144,9 @@ public class PartTreeDynamoDBQueryUnitTest {
 		Mockito.when(mockDynamoDBQueryMethod.getEntityType()).thenReturn(clazz);
 		Mockito.when(mockDynamoDBQueryMethod.getName()).thenReturn(repositoryMethodName);
 		Mockito.when(mockDynamoDBQueryMethod.getParameters()).thenReturn(mockParameters);
-		Mockito.when(mockDynamoDBQueryMethod.getConsistentReadMode()).thenReturn(QueryConstants.ConsistentReadMode.DEFAULT);
-		Mockito.when(mockParameters.getBindableParameters()).thenReturn(mockParameters);
-		Mockito.when(mockParameters.getNumberOfParameters()).thenReturn(numberOfParameters);
+		lenient().when(mockDynamoDBQueryMethod.getConsistentReadMode()).thenReturn(QueryConstants.ConsistentReadMode.DEFAULT);
+		lenient().when(mockParameters.getBindableParameters()).thenReturn(mockParameters);
+		lenient().when(mockParameters.getNumberOfParameters()).thenReturn(numberOfParameters);
 		// Mockito.when(mockDynamoDBQueryMethod.getReturnedObjectType()).thenReturn(clazz);
 		if (hashKeyProperty != null) {
 			// Mockito.when(mockEntityMetadata.isHashKeyProperty(hashKeyProperty)).thenReturn(true);
@@ -154,21 +154,21 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 		for (int i = 0; i < numberOfParameters; i++) {
 			Parameter mockParameter = Mockito.mock(Parameter.class);
-			Mockito.when(mockParameter.getIndex()).thenReturn(i);
-			Mockito.when(mockParameters.getBindableParameter(i)).thenReturn(mockParameter);
+			lenient().when(mockParameter.getIndex()).thenReturn(i);
+			lenient().when(mockParameters.getBindableParameter(i)).thenReturn(mockParameter);
 		}
 		partTreeDynamoDBQuery = new PartTreeDynamoDBQuery<>(mockDynamoDBOperations, mockDynamoDBQueryMethod);
 	}
 
 	@Test
-	public void testGetQueryMethod() {
+	void testGetQueryMethod() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"findById", 1, "id", null);
 		assertEquals(mockDynamoDBUserQueryMethod, partTreeDynamoDBQuery.getQueryMethod());
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingSingleEntity_WithSingleStringParameter_WhenFindingByHashKey() {
+	void testExecute_WhenFinderMethodIsFindingSingleEntity_WithSingleStringParameter_WhenFindingByHashKey() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"findById", 1, "id", null);
 
@@ -187,7 +187,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingSingleEntityWithCompositeId_WithSingleStringParameter_WhenFindingByHashAndRangeKey() {
+	void testExecute_WhenFinderMethodIsFindingSingleEntityWithCompositeId_WithSingleStringParameter_WhenFindingByHashAndRangeKey() {
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "findByUserNameAndPlaylistName", 2, "userName", "playlistName");
 
@@ -207,7 +207,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingSingleEntityWithCompositeId_WhenFindingByCompositeId() {
+	void testExecute_WhenFinderMethodIsFindingSingleEntityWithCompositeId_WhenFindingByCompositeId() {
 		PlaylistId playlistId = new PlaylistId();
 		playlistId.setUserName("someUserName");
 		playlistId.setPlaylistName("somePlaylistName");
@@ -233,8 +233,8 @@ public class PartTreeDynamoDBQueryUnitTest {
 		Mockito.verify(mockDynamoDBOperations).load(Playlist.class, "someUserName", "somePlaylistName");
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByNotCompositeId() {
+	@Test
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByNotCompositeId() {
 		PlaylistId playlistId = new PlaylistId();
 		playlistId.setUserName("someUserName");
 		playlistId.setPlaylistName("somePlaylistName");
@@ -260,12 +260,12 @@ public class PartTreeDynamoDBQueryUnitTest {
 		// Execute the query
 
 		Object[] parameters = new Object[]{playlistId};
-		partTreeDynamoDBQuery.execute(parameters);
+		assertThatThrownBy(() -> partTreeDynamoDBQuery.execute(parameters)).isInstanceOf(UnsupportedOperationException.class);
 
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByRangeKeyOnly() {
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByRangeKeyOnly() {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "findByPlaylistName", 1, "userName", "playlistName");
@@ -320,7 +320,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByCompositeIdWithRangeKeyOnly() {
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByCompositeIdWithRangeKeyOnly() {
 		PlaylistId playlistId = new PlaylistId();
 		playlistId.setPlaylistName("somePlaylistName");
 
@@ -379,7 +379,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WithSingleStringParameter_WhenFindingByHashKeyOnly() {
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WithSingleStringParameter_WhenFindingByHashKeyOnly() {
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "findByUserName", 1, "userName", "playlistName");
 		Mockito.when(mockDynamoDBPlaylistQueryMethod.isCollectionQuery()).thenReturn(true);
@@ -417,7 +417,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsCountingEntityWithCompositeIdList_WhenFindingByRangeKeyOnly_ScanCountEnabled() {
+	void testExecute_WhenFinderMethodIsCountingEntityWithCompositeIdList_WhenFindingByRangeKeyOnly_ScanCountEnabled() {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "countByPlaylistName", 1, "userName", "playlistName");
@@ -467,14 +467,14 @@ public class PartTreeDynamoDBQueryUnitTest {
 		Mockito.verify(mockDynamoDBOperations).count(playlistClassCaptor.getValue(), scanCaptor.getValue());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testExecute_WhenFinderMethodIsCountingEntityWithCompositeIdList_WhenFindingByRangeKeyOnly_ScanCountDisabled() {
+	@Test
+	void testExecute_WhenFinderMethodIsCountingEntityWithCompositeIdList_WhenFindingByRangeKeyOnly_ScanCountDisabled() {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "countByPlaylistName", 1, "userName", "playlistName");
 
-		Mockito.when(mockDynamoDBPlaylistQueryMethod.isCollectionQuery()).thenReturn(false);
-		Mockito.when(mockDynamoDBPlaylistQueryMethod.isScanCountEnabled()).thenReturn(false);
+		lenient().when(mockDynamoDBPlaylistQueryMethod.isCollectionQuery()).thenReturn(false);
+		lenient().when(mockDynamoDBPlaylistQueryMethod.isScanCountEnabled()).thenReturn(false);
 
 		// Mock out specific DynamoDBOperations behavior expected by this method
 		// ArgumentCaptor<DynamoDBScanExpression> scanCaptor =
@@ -488,12 +488,12 @@ public class PartTreeDynamoDBQueryUnitTest {
 		// Execute the query
 
 		Object[] parameters = new Object[]{"somePlaylistName"};
-		partTreeDynamoDBQuery.execute(parameters);
+		assertThatThrownBy(() -> partTreeDynamoDBQuery.execute(parameters)).isInstanceOf(IllegalArgumentException.class);
 
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WithSingleStringParameter_WhenFindingByHashKeyAndNotRangeKey() {
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WithSingleStringParameter_WhenFindingByHashKeyAndNotRangeKey() {
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "findByUserNameAndPlaylistNameNot", 2, "userName", "playlistName");
 		Mockito.when(mockDynamoDBPlaylistQueryMethod.isCollectionQuery()).thenReturn(true);
@@ -565,7 +565,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByCompositeIdWithHashKeyOnly() {
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByCompositeIdWithHashKeyOnly() {
 		PlaylistId playlistId = new PlaylistId();
 		playlistId.setUserName("someUserName");
 
@@ -612,7 +612,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByCompositeId_HashKey() {
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByCompositeId_HashKey() {
 		PlaylistId playlistId = new PlaylistId();
 		playlistId.setUserName("someUserName");
 
@@ -659,7 +659,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByCompositeId_HashKeyAndIndexRangeKey() {
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByCompositeId_HashKeyAndIndexRangeKey() {
 		PlaylistId playlistId = new PlaylistId();
 		playlistId.setUserName("someUserName");
 
@@ -714,7 +714,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingSingleEntityWithCompositeId_WhenFindingByCompositeId_HashKeyAndCompositeId_RangeKey() {
+	void testExecute_WhenFinderMethodIsFindingSingleEntityWithCompositeId_WhenFindingByCompositeId_HashKeyAndCompositeId_RangeKey() {
 		PlaylistId playlistId = new PlaylistId();
 		playlistId.setUserName("someUserName");
 		playlistId.setPlaylistName("somePlaylistName");
@@ -741,7 +741,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByCompositeIdWithHashKeyOnly_WhenSortingByRangeKey() {
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByCompositeIdWithHashKeyOnly_WhenSortingByRangeKey() {
 		PlaylistId playlistId = new PlaylistId();
 		playlistId.setUserName("someUserName");
 
@@ -787,8 +787,8 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	// Can't sort by indexrangekey when querying by hash key only
-	@Test(expected = UnsupportedOperationException.class)
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByCompositeIdWithHashKeyOnly_WhenSortingByIndexRangeKey() {
+	@Test
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByCompositeIdWithHashKeyOnly_WhenSortingByIndexRangeKey() {
 		PlaylistId playlistId = new PlaylistId();
 		playlistId.setUserName("someUserName");
 
@@ -817,12 +817,12 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 		// Execute the query
 		Object[] parameters = new Object[]{playlistId};
-		partTreeDynamoDBQuery.execute(parameters);
+		assertThatThrownBy(() -> partTreeDynamoDBQuery.execute(parameters)).isInstanceOf(UnsupportedOperationException.class);
 
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByHashKeyAndIndexRangeKey() {
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByHashKeyAndIndexRangeKey() {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "findByUserNameAndDisplayName", 2, "userName", "playlistName");
@@ -869,7 +869,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByHashKeyAndIndexRangeKey_WithValidOrderSpecified() {
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByHashKeyAndIndexRangeKey_WithValidOrderSpecified() {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "findByUserNameAndDisplayNameOrderByDisplayNameDesc", 2, "userName", "playlistName");
@@ -912,15 +912,15 @@ public class PartTreeDynamoDBQueryUnitTest {
 		assertEquals(1, condition.getAttributeValueList().size());
 		assertEquals("someDisplayName", condition.getAttributeValueList().get(0).getS());
 
-		Assert.assertFalse(playlistQueryCaptor.getValue().isScanIndexForward());
+		assertFalse(playlistQueryCaptor.getValue().isScanIndexForward());
 
 		// Verify that the expected DynamoDBOperations method was called
 		Mockito.verify(mockDynamoDBOperations).query(playlistClassCaptor.getValue(), playlistQueryCaptor.getValue());
 
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByHashKeyAndIndexRangeKey_WithInvalidOrderSpecified() {
+	@Test
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByHashKeyAndIndexRangeKey_WithInvalidOrderSpecified() {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "findByUserNameAndDisplayNameOrderByPlaylistNameDesc", 2, "userName", "playlistName");
@@ -946,12 +946,12 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 		// Execute the query
 		Object[] parameters = new Object[]{"someUserName", "someDisplayName"};
-		partTreeDynamoDBQuery.execute(parameters);
+		assertThatThrownBy(() -> partTreeDynamoDBQuery.execute(parameters)).isInstanceOf(UnsupportedOperationException.class);
 
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByHashKeyAndIndexRangeKey_OrderByIndexRangeKey() {
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByHashKeyAndIndexRangeKey_OrderByIndexRangeKey() {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "findByUserNameAndDisplayNameOrderByDisplayNameDesc", 2, "userName", "playlistName");
@@ -998,8 +998,8 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	// Sorting by range key when querying by indexrangekey not supported
-	@Test(expected = UnsupportedOperationException.class)
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByHashKeyAndIndexRangeKey_OrderByRangeKey() {
+	@Test
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByHashKeyAndIndexRangeKey_OrderByRangeKey() {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "findByUserNameAndDisplayNameOrderByPlaylistNameDesc", 2, "userName", "playlistName");
@@ -1025,12 +1025,13 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 		// Execute the query
 		Object[] parameters = new Object[]{"someUserName", "someDisplayName"};
-		partTreeDynamoDBQuery.execute(parameters);
+		
+		assertThatThrownBy(() -> partTreeDynamoDBQuery.execute(parameters)).isInstanceOf(UnsupportedOperationException.class);
 
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByHashKeyAndIndexRangeKeyWithOveriddenName() {
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByHashKeyAndIndexRangeKeyWithOveriddenName() {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "findByUserNameAndDisplayName", 2, "userName", "playlistName");
@@ -1080,7 +1081,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByCompositeIdWithHashKeyOnlyAndByAnotherPropertyWithOverriddenAttributeName() {
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByCompositeIdWithHashKeyOnlyAndByAnotherPropertyWithOverriddenAttributeName() {
 		PlaylistId playlistId = new PlaylistId();
 		playlistId.setUserName("someUserName");
 
@@ -1147,7 +1148,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByCompositeIdWithRangeKeyOnlyAndByAnotherPropertyWithOverriddenAttributeName() {
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByCompositeIdWithRangeKeyOnlyAndByAnotherPropertyWithOverriddenAttributeName() {
 		PlaylistId playlistId = new PlaylistId();
 		playlistId.setPlaylistName("somePlaylistName");
 
@@ -1212,7 +1213,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByNotHashKeyAndNotRangeKey() {
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByNotHashKeyAndNotRangeKey() {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "findByUserNameNotAndPlaylistNameNot", 2, "userName", "playlistName");
@@ -1269,7 +1270,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByCompositeIdAndByAnotherPropertyWithOverriddenAttributeName() {
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeIdList_WhenFindingByCompositeIdAndByAnotherPropertyWithOverriddenAttributeName() {
 		PlaylistId playlistId = new PlaylistId();
 		playlistId.setUserName("someUserName");
 		playlistId.setPlaylistName("somePlaylistName");
@@ -1348,7 +1349,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingSingleEntity_WithSingleStringParameter_WhenNotFindingByHashKey() {
+	void testExecute_WhenFinderMethodIsFindingSingleEntity_WithSingleStringParameter_WhenNotFindingByHashKey() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"findByName", 1, "id", null);
 
@@ -1397,7 +1398,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingSingleEntity_WithSingleStringParameter_WhenNotFindingByHashKey_WhenDynamoAttributeNameOverridden() {
+	void testExecute_WhenFinderMethodIsFindingSingleEntity_WithSingleStringParameter_WhenNotFindingByHashKey_WhenDynamoAttributeNameOverridden() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"findByName", 1, "id", null);
 		Mockito.when(mockUserEntityMetadata.getOverriddenAttributeName("name")).thenReturn(Optional.of("Name"));
@@ -1447,7 +1448,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingSingleEntity_WithMultipleStringParameters_WhenFindingByHashKeyAndANonHashOrRangeProperty() {
+	void testExecute_WhenFinderMethodIsFindingSingleEntity_WithMultipleStringParameters_WhenFindingByHashKeyAndANonHashOrRangeProperty() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"findByIdAndName", 2, "id", null);
 
@@ -1505,7 +1506,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingSingleEntity_WithMultipleStringParameters_WhenFindingByHashKeyAndACollectionProperty() {
+	void testExecute_WhenFinderMethodIsFindingSingleEntity_WithMultipleStringParameters_WhenFindingByHashKeyAndACollectionProperty() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"findByTestSet", 1, "id", null);
 
@@ -1563,7 +1564,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingSingleEntity_WithMultipleStringParameters_WhenFindingByHashKeyAndANonHashOrRangeProperty_WhenDynamoDBAttributeNamesOveridden() {
+	void testExecute_WhenFinderMethodIsFindingSingleEntity_WithMultipleStringParameters_WhenFindingByHashKeyAndANonHashOrRangeProperty_WhenDynamoDBAttributeNamesOveridden() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"findByIdAndName", 2, "id", null);
 
@@ -1624,7 +1625,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleStringParameter_WhenNotFindingByHashKey() {
+	void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleStringParameter_WhenNotFindingByHashKey() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"findByName", 1, "id", null);
 		Mockito.when(mockDynamoDBUserQueryMethod.isCollectionQuery()).thenReturn(true);
@@ -1677,12 +1678,12 @@ public class PartTreeDynamoDBQueryUnitTest {
 		Mockito.verify(mockDynamoDBOperations).scan(userClassCaptor.getValue(), scanCaptor.getValue());
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	// Not yet supported
-	public void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleStringParameterIgnoringCase_WhenNotFindingByHashKey() {
+	void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleStringParameterIgnoringCase_WhenNotFindingByHashKey() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"findByNameIgnoringCase", 1, "id", null);
-		Mockito.when(mockDynamoDBUserQueryMethod.isCollectionQuery()).thenReturn(true);
+		lenient().when(mockDynamoDBUserQueryMethod.isCollectionQuery()).thenReturn(true);
 
 		// Mock out specific DynamoDBOperations behavior expected by this method
 		// ArgumentCaptor<DynamoDBScanExpression> scanCaptor =
@@ -1697,13 +1698,13 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 		// Execute the query
 		Object[] parameters = new Object[]{"someName"};
-		partTreeDynamoDBQuery.execute(parameters);
+		assertThatThrownBy(() -> partTreeDynamoDBQuery.execute(parameters)).isInstanceOf(UnsupportedOperationException.class);
 
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	// Not yet supported
-	public void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleStringParameter_WithSort_WhenNotFindingByHashKey() {
+	void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleStringParameter_WithSort_WhenNotFindingByHashKey() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"findByNameOrderByNameAsc", 1, "id", null);
 		Mockito.when(mockDynamoDBUserQueryMethod.isCollectionQuery()).thenReturn(true);
@@ -1721,12 +1722,13 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 		// Execute the query
 		Object[] parameters = new Object[]{"someName"};
-		partTreeDynamoDBQuery.execute(parameters);
+		
+		assertThatThrownBy(() -> partTreeDynamoDBQuery.execute(parameters)).isInstanceOf(UnsupportedOperationException.class);
 
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleStringArrayParameter_WithIn_WhenNotFindingByHashKey() {
+	void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleStringArrayParameter_WithIn_WhenNotFindingByHashKey() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"findByNameIn", 1, "id", null);
 		Mockito.when(mockDynamoDBUserQueryMethod.isCollectionQuery()).thenReturn(true);
@@ -1783,7 +1785,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleListParameter_WithIn_WhenNotFindingByHashKey() {
+	void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleListParameter_WithIn_WhenNotFindingByHashKey() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"findByNameIn", 1, "id", null);
 		Mockito.when(mockDynamoDBUserQueryMethod.isCollectionQuery()).thenReturn(true);
@@ -1840,7 +1842,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleDateParameter_WhenNotFindingByHashKey()
+	void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleDateParameter_WhenNotFindingByHashKey()
 			throws ParseException {
 		String joinDateString = "2013-09-12T14:04:03.123Z";
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -1900,7 +1902,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleDateParameter_WithCustomMarshaller_WhenNotFindingByHashKey()
+	void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleDateParameter_WithCustomMarshaller_WhenNotFindingByHashKey()
 			throws ParseException {
 		String joinYearString = "2013";
 		DateFormat dateFormat = new SimpleDateFormat("yyyy");
@@ -1963,7 +1965,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 	// Global Secondary Index Test 1
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleDateParameter_WithCustomMarshaller_WhenFindingByGlobalSecondaryHashIndexHashKey()
+	void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleDateParameter_WithCustomMarshaller_WhenFindingByGlobalSecondaryHashIndexHashKey()
 			throws ParseException {
 		String joinYearString = "2013";
 		DateFormat dateFormat = new SimpleDateFormat("yyyy");
@@ -2031,7 +2033,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 	// Global Secondary Index Test 2
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityList_WithDateParameterAndStringParameter_WithCustomMarshaller_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKey()
+	void testExecute_WhenFinderMethodIsFindingEntityList_WithDateParameterAndStringParameter_WithCustomMarshaller_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKey()
 			throws ParseException {
 		String joinYearString = "2013";
 		DateFormat dateFormat = new SimpleDateFormat("yyyy");
@@ -2042,10 +2044,10 @@ public class PartTreeDynamoDBQueryUnitTest {
 		Mockito.when(mockDynamoDBUserQueryMethod.isCollectionQuery()).thenReturn(true);
 		DynamoDBYearMarshaller marshaller = new DynamoDBYearMarshaller();
 
-		Mockito.when(mockUserEntityMetadata.isGlobalIndexHashKeyProperty("joinYear")).thenReturn(true);
-		Mockito.when(mockUserEntityMetadata.isGlobalIndexRangeKeyProperty("postCode")).thenReturn(true);
+		lenient().when(mockUserEntityMetadata.isGlobalIndexHashKeyProperty("joinYear")).thenReturn(true);
+		lenient().when(mockUserEntityMetadata.isGlobalIndexRangeKeyProperty("postCode")).thenReturn(true);
 
-		Mockito.when(mockUserEntityMetadata.getMarshallerForProperty("joinYear")).thenReturn(marshaller);
+		lenient().when(mockUserEntityMetadata.getMarshallerForProperty("joinYear")).thenReturn(marshaller);
 
 		Map<String, String[]> indexRangeKeySecondaryIndexNames = new HashMap<String, String[]>();
 		indexRangeKeySecondaryIndexNames.put("joinYear", new String[]{"JoinYear-index"});
@@ -2111,7 +2113,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 	// Global Secondary Index Test 3
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashIndexHashKey()
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashIndexHashKey()
 			throws ParseException {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
@@ -2173,7 +2175,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 	// Global Secondary Index Test 3a
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashIndexHashKey_WhereSecondaryHashKeyIsPrimaryRangeKey()
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashIndexHashKey_WhereSecondaryHashKeyIsPrimaryRangeKey()
 			throws ParseException {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
@@ -2233,14 +2235,14 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 	// Global Secondary Index Test 4
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKey_WhereSecondaryHashKeyIsPrimaryHashKey()
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKey_WhereSecondaryHashKeyIsPrimaryHashKey()
 			throws ParseException {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "findByUserNameAndDisplayName", 2, "userName", "playlistName");
 		Mockito.when(mockDynamoDBPlaylistQueryMethod.isCollectionQuery()).thenReturn(true);
 
-		Mockito.when(mockPlaylistEntityMetadata.isGlobalIndexHashKeyProperty("userName")).thenReturn(true);
+		lenient().when(mockPlaylistEntityMetadata.isGlobalIndexHashKeyProperty("userName")).thenReturn(true);
 		// Mockito.when(mockPlaylistEntityMetadata.isGlobalIndexRangeKeyProperty("displayName")).thenReturn(true);
 
 		Map<String, String[]> indexRangeKeySecondaryIndexNames = new HashMap<String, String[]>();
@@ -2308,14 +2310,14 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 	// Global Secondary Index Test 4b
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKey_WhereSecondaryHashKeyIsPrimaryRangeKey()
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKey_WhereSecondaryHashKeyIsPrimaryRangeKey()
 			throws ParseException {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "findByPlaylistNameAndDisplayName", 2, "userName", "playlistName");
 		Mockito.when(mockDynamoDBPlaylistQueryMethod.isCollectionQuery()).thenReturn(true);
 
-		Mockito.when(mockPlaylistEntityMetadata.isGlobalIndexHashKeyProperty("playlistName")).thenReturn(true);
+		lenient().when(mockPlaylistEntityMetadata.isGlobalIndexHashKeyProperty("playlistName")).thenReturn(true);
 		// Mockito.when(mockPlaylistEntityMetadata.isGlobalIndexRangeKeyProperty("displayName")).thenReturn(true);
 		Map<String, String[]> indexRangeKeySecondaryIndexNames = new HashMap<String, String[]>();
 		indexRangeKeySecondaryIndexNames.put("playlistName", new String[]{"PlaylistName-DisplayName-index"});
@@ -2382,7 +2384,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 	// Global Secondary Index Test 4c
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKey_WhereSecondaryRangeKeyIsPrimaryRangeKey()
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKey_WhereSecondaryRangeKeyIsPrimaryRangeKey()
 			throws ParseException {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
@@ -2458,7 +2460,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 	// Global Secondary Index Test 4d
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKey_WhereSecondaryRangeKeyIsPrimaryHashKey()
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKey_WhereSecondaryRangeKeyIsPrimaryHashKey()
 			throws ParseException {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
@@ -2534,14 +2536,14 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 	// Global Secondary Index Test 4e
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKeyNonEqualityCondition_WhereSecondaryHashKeyIsPrimaryHashKey()
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKeyNonEqualityCondition_WhereSecondaryHashKeyIsPrimaryHashKey()
 			throws ParseException {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "findByUserNameAndDisplayNameAfter", 2, "userName", "playlistName");
 		Mockito.when(mockDynamoDBPlaylistQueryMethod.isCollectionQuery()).thenReturn(true);
 
-		Mockito.when(mockPlaylistEntityMetadata.isGlobalIndexHashKeyProperty("userName")).thenReturn(true);
+		lenient().when(mockPlaylistEntityMetadata.isGlobalIndexHashKeyProperty("userName")).thenReturn(true);
 		// Mockito.when(mockPlaylistEntityMetadata.isGlobalIndexRangeKeyProperty("displayName")).thenReturn(true);
 
 		Map<String, String[]> indexRangeKeySecondaryIndexNames = new HashMap<String, String[]>();
@@ -2609,14 +2611,14 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 	// Global Secondary Index Test 4e2
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKeyNonEqualityCondition_WhereSecondaryHashKeyIsPrimaryHashKey_WhenAccessingPropertyViaCompositeIdPath()
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKeyNonEqualityCondition_WhereSecondaryHashKeyIsPrimaryHashKey_WhenAccessingPropertyViaCompositeIdPath()
 			throws ParseException {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "findByPlaylistIdUserNameAndDisplayNameAfter", 2, "userName", "playlistName");
 		Mockito.when(mockDynamoDBPlaylistQueryMethod.isCollectionQuery()).thenReturn(true);
 
-		Mockito.when(mockPlaylistEntityMetadata.isGlobalIndexHashKeyProperty("userName")).thenReturn(true);
+		lenient().when(mockPlaylistEntityMetadata.isGlobalIndexHashKeyProperty("userName")).thenReturn(true);
 		// Mockito.when(mockPlaylistEntityMetadata.isGlobalIndexRangeKeyProperty("displayName")).thenReturn(true);
 
 		Map<String, String[]> indexRangeKeySecondaryIndexNames = new HashMap<String, String[]>();
@@ -2684,14 +2686,14 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 	// Global Secondary Index Test 4f
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKeyNonEqualityCondition_WhereSecondaryHashKeyIsPrimaryRangeKey()
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKeyNonEqualityCondition_WhereSecondaryHashKeyIsPrimaryRangeKey()
 			throws ParseException {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "findByPlaylistNameAndDisplayNameAfter", 2, "userName", "playlistName");
 		Mockito.when(mockDynamoDBPlaylistQueryMethod.isCollectionQuery()).thenReturn(true);
 
-		Mockito.when(mockPlaylistEntityMetadata.isGlobalIndexHashKeyProperty("playlistName")).thenReturn(true);
+		lenient().when(mockPlaylistEntityMetadata.isGlobalIndexHashKeyProperty("playlistName")).thenReturn(true);
 		// Mockito.when(mockPlaylistEntityMetadata.isGlobalIndexRangeKeyProperty("displayName")).thenReturn(true);
 		Map<String, String[]> indexRangeKeySecondaryIndexNames = new HashMap<String, String[]>();
 		indexRangeKeySecondaryIndexNames.put("playlistName", new String[]{"PlaylistName-DisplayName-index"});
@@ -2758,15 +2760,15 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 	// Global Secondary Index Test 4g
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKeyNonEqualityCondition_WhereSecondaryRangeKeyIsPrimaryRangeKey()
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKeyNonEqualityCondition_WhereSecondaryRangeKeyIsPrimaryRangeKey()
 			throws ParseException {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "findByDisplayNameAndPlaylistNameAfter", 2, "userName", "playlistName");
 		Mockito.when(mockDynamoDBPlaylistQueryMethod.isCollectionQuery()).thenReturn(true);
 
-		Mockito.when(mockPlaylistEntityMetadata.isGlobalIndexHashKeyProperty("displayName")).thenReturn(true);
-		Mockito.when(mockPlaylistEntityMetadata.isGlobalIndexRangeKeyProperty("playlistName")).thenReturn(true);
+		lenient().when(mockPlaylistEntityMetadata.isGlobalIndexHashKeyProperty("displayName")).thenReturn(true);
+		lenient().when(mockPlaylistEntityMetadata.isGlobalIndexRangeKeyProperty("playlistName")).thenReturn(true);
 
 		Map<String, String[]> indexRangeKeySecondaryIndexNames = new HashMap<String, String[]>();
 		indexRangeKeySecondaryIndexNames.put("displayName", new String[]{"DisplayName-PlaylistName-index"});
@@ -2834,15 +2836,15 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 	// Global Secondary Index Test 4h
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKeyNonEqualityCondition_WhereSecondaryRangeKeyIsPrimaryHashKey()
+	void testExecute_WhenFinderMethodIsFindingEntityWithCompositeKeyList_WhenFindingByGlobalSecondaryHashAndRangeIndexHashAndRangeKeyNonEqualityCondition_WhereSecondaryRangeKeyIsPrimaryHashKey()
 			throws ParseException {
 
 		setupCommonMocksForThisRepositoryMethod(mockPlaylistEntityMetadata, mockDynamoDBPlaylistQueryMethod,
 				Playlist.class, "findByDisplayNameAndUserNameAfter", 2, "userName", "playlistName");
 		Mockito.when(mockDynamoDBPlaylistQueryMethod.isCollectionQuery()).thenReturn(true);
 
-		Mockito.when(mockPlaylistEntityMetadata.isGlobalIndexHashKeyProperty("displayName")).thenReturn(true);
-		Mockito.when(mockPlaylistEntityMetadata.isGlobalIndexRangeKeyProperty("userName")).thenReturn(true);
+		lenient().when(mockPlaylistEntityMetadata.isGlobalIndexHashKeyProperty("displayName")).thenReturn(true);
+		lenient().when(mockPlaylistEntityMetadata.isGlobalIndexRangeKeyProperty("userName")).thenReturn(true);
 
 		Map<String, String[]> indexRangeKeySecondaryIndexNames = new HashMap<String, String[]>();
 		indexRangeKeySecondaryIndexNames.put("displayName", new String[]{"DisplayName-UserName-index"});
@@ -2910,15 +2912,15 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 	// Global Secondary Index Test 4i
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityByGlobalSecondaryHashAndRangeIndexHashAndRangeKeyNonEqualityCondition_WhereBothSecondaryHashKeyAndSecondaryIndexRangeKeyMembersOfMultipleIndexes()
+	void testExecute_WhenFinderMethodIsFindingEntityByGlobalSecondaryHashAndRangeIndexHashAndRangeKeyNonEqualityCondition_WhereBothSecondaryHashKeyAndSecondaryIndexRangeKeyMembersOfMultipleIndexes()
 			throws ParseException {
 
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"findByNameAndPostCodeAfter", 2, "id", null);
 		Mockito.when(mockDynamoDBUserQueryMethod.isCollectionQuery()).thenReturn(true);
 
-		Mockito.when(mockUserEntityMetadata.isGlobalIndexHashKeyProperty("name")).thenReturn(true);
-		Mockito.when(mockUserEntityMetadata.isGlobalIndexRangeKeyProperty("postCode")).thenReturn(true);
+		lenient().when(mockUserEntityMetadata.isGlobalIndexHashKeyProperty("name")).thenReturn(true);
+		lenient().when(mockUserEntityMetadata.isGlobalIndexRangeKeyProperty("postCode")).thenReturn(true);
 
 		Map<String, String[]> indexRangeKeySecondaryIndexNames = new HashMap<String, String[]>();
 		indexRangeKeySecondaryIndexNames.put("name", new String[]{"Name-PostCode-index", "Name-JoinYear-index"});
@@ -2985,7 +2987,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 	// Global Secondary Index Test 4j
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityByGlobalSecondaryHashAndRangeIndexHashCondition_WhereSecondaryHashKeyMemberOfMultipleIndexes()
+	void testExecute_WhenFinderMethodIsFindingEntityByGlobalSecondaryHashAndRangeIndexHashCondition_WhereSecondaryHashKeyMemberOfMultipleIndexes()
 			throws ParseException {
 
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
@@ -3052,7 +3054,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 
 	// Global Secondary Index Test 4k
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityByGlobalSecondaryHashAndRangeIndexHashCondition_WhereSecondaryHashKeyMemberOfMultipleIndexes_WhereOneIndexIsExactMatch()
+	void testExecute_WhenFinderMethodIsFindingEntityByGlobalSecondaryHashAndRangeIndexHashCondition_WhereSecondaryHashKeyMemberOfMultipleIndexes_WhereOneIndexIsExactMatch()
 			throws ParseException {
 
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
@@ -3118,7 +3120,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleStringParameter_WithCustomMarshaller_WhenNotFindingByHashKey()
+	void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleStringParameter_WithCustomMarshaller_WhenNotFindingByHashKey()
 			throws ParseException {
 
 		String postcode = "N1";
@@ -3179,7 +3181,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleIntegerParameter_WhenNotFindingByHashKey() {
+	void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleIntegerParameter_WhenNotFindingByHashKey() {
 		int numberOfPlaylists = 5;
 
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
@@ -3235,7 +3237,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleStringParameter_WhenNotFindingByNotHashKey() {
+	void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleStringParameter_WhenNotFindingByNotHashKey() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"findByIdNot", 1, "id", null);
 		Mockito.when(mockDynamoDBUserQueryMethod.isCollectionQuery()).thenReturn(true);
@@ -3289,7 +3291,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleStringParameter_WhenNotFindingByNotAProperty() {
+	void testExecute_WhenFinderMethodIsFindingEntityList_WithSingleStringParameter_WhenNotFindingByNotAProperty() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"findByNameNot", 1, "id", null);
 		Mockito.when(mockDynamoDBUserQueryMethod.isCollectionQuery()).thenReturn(true);
@@ -3343,7 +3345,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenExistsQueryFindsNoEntity() {
+	void testExecute_WhenExistsQueryFindsNoEntity() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"existsByName", 1, "id", null);
 		Mockito.when(mockUserEntityMetadata.getOverriddenAttributeName("name")).thenReturn(Optional.of("Name"));
@@ -3393,7 +3395,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenExistsQueryFindsOneEntity() {
+	void testExecute_WhenExistsQueryFindsOneEntity() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"existsByName", 1, "id", null);
 		Mockito.when(mockUserEntityMetadata.getOverriddenAttributeName("name")).thenReturn(Optional.of("Name"));
@@ -3444,7 +3446,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenExistsQueryFindsMultipleEntities() {
+	void testExecute_WhenExistsQueryFindsMultipleEntities() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"existsByName", 1, "id", null);
 		Mockito.when(mockUserEntityMetadata.getOverriddenAttributeName("name")).thenReturn(Optional.of("Name"));
@@ -3496,7 +3498,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenExistsWithLimitQueryFindsNoEntity() {
+	void testExecute_WhenExistsWithLimitQueryFindsNoEntity() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"existsTop1ByName", 1, "id", null);
 		Mockito.when(mockUserEntityMetadata.getOverriddenAttributeName("name")).thenReturn(Optional.of("Name"));
@@ -3546,7 +3548,7 @@ public class PartTreeDynamoDBQueryUnitTest {
 	}
 
 	@Test
-	public void testExecute_WhenExistsWithLimitQueryFindsOneEntity() {
+	void testExecute_WhenExistsWithLimitQueryFindsOneEntity() {
 		setupCommonMocksForThisRepositoryMethod(mockUserEntityMetadata, mockDynamoDBUserQueryMethod, User.class,
 				"existsTop1ByName", 1, "id", null);
 		Mockito.when(mockUserEntityMetadata.getOverriddenAttributeName("name")).thenReturn(Optional.of("Name"));

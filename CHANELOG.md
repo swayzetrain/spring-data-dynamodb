@@ -1,6 +1,8 @@
-# 5.2.6
+# 6.0.0
 
-## New Features
+## Housekeeping
+1. Upgrade to Spring 6.x
+2. Upgrade Spring Data to 3.1.2
 
 # 5.2.5
 

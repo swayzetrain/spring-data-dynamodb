@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,16 @@
  */
 package org.socialsignin.spring.data.dynamodb.repository;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
-@RunWith(MockitoJUnitRunner.class)
-public class DynamoDBHashAndRangeKeyTest {
+@ExtendWith(MockitoExtension.class)
+class DynamoDBHashAndRangeKeyTest {
 
 	@Mock
 	private Object hash;
@@ -32,7 +32,7 @@ public class DynamoDBHashAndRangeKeyTest {
 	private Object range;
 
 	@Test
-	public void testConstructor() {
+	void testConstructor() {
 		DynamoDBHashAndRangeKey underTest = new DynamoDBHashAndRangeKey(hash, range);
 
 		assertEquals(hash, underTest.getHashKey());
@@ -40,7 +40,7 @@ public class DynamoDBHashAndRangeKeyTest {
 	}
 
 	@Test
-	public void testDefaultConstructor() {
+	void testDefaultConstructor() {
 		DynamoDBHashAndRangeKey underTest = new DynamoDBHashAndRangeKey();
 
 		assertNull(underTest.getHashKey());
@@ -48,7 +48,7 @@ public class DynamoDBHashAndRangeKeyTest {
 	}
 
 	@Test
-	public void testGetterSetter() {
+	void testGetterSetter() {
 		DynamoDBHashAndRangeKey underTest = new DynamoDBHashAndRangeKey();
 
 		underTest.setHashKey(hash);

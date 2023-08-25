@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,18 +31,6 @@ import java.util.Optional;
 public class DynamoDBCountQueryCreator<T, ID> extends AbstractDynamoDBQueryCreator<T, ID, Long> {
 
 	private boolean pageQuery;
-
-	/**
-	 *
-	 * @deprecated use the new constructor with all required fields, will be removed in 5.3.0
-	 */
-	@Deprecated
-	public DynamoDBCountQueryCreator(PartTree tree, DynamoDBEntityInformation<T, ID> entityMetadata,
-			DynamoDBOperations dynamoDBOperations, boolean pageQuery) {
-		super(tree, entityMetadata, Optional.empty(), Optional.empty(),
-				QueryConstants.ConsistentReadMode.DEFAULT, Optional.empty(), null, null, dynamoDBOperations);
-		this.pageQuery = pageQuery;
-	}
 
 	public DynamoDBCountQueryCreator(PartTree tree, ParameterAccessor parameterAccessor,
 									 DynamoDBEntityInformation<T, ID> entityMetadata, Optional<String> filterExpression,

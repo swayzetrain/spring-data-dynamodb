@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,12 @@
  */
 package org.socialsignin.spring.data.dynamodb.config;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.type.AnnotationMetadata;
 
@@ -27,8 +29,8 @@ import org.springframework.core.type.AnnotationMetadata;
  *
  * @author Vito Limandibhrata
  */
-@RunWith(MockitoJUnitRunner.class)
-public class DynamoDBAuditingRegistrarUnitTests {
+@ExtendWith(MockitoExtension.class)
+class DynamoDBAuditingRegistrarUnitTests {
 
 	DynamoDBAuditingRegistrar registrar = new DynamoDBAuditingRegistrar();
 
@@ -37,13 +39,14 @@ public class DynamoDBAuditingRegistrarUnitTests {
 	@Mock
 	BeanDefinitionRegistry registry;
 
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsNullAnnotationMetadata() {
-		registrar.registerBeanDefinitions(null, registry);
+	@Test
+	void rejectsNullAnnotationMetadata() {
+		assertThatThrownBy(() -> registrar.registerBeanDefinitions(null, registry)).isInstanceOf(IllegalArgumentException.class);
+		
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsNullBeanDefinitionRegistry() {
-		registrar.registerBeanDefinitions(metadata, null);
+	@Test
+	void rejectsNullBeanDefinitionRegistry() {		
+		assertThatThrownBy(() -> registrar.registerBeanDefinitions(metadata, null)).isInstanceOf(IllegalArgumentException.class);
 	}
 }

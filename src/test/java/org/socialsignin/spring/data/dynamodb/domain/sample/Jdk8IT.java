@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,9 @@
  */
 package org.socialsignin.spring.data.dynamodb.domain.sample;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.socialsignin.spring.data.dynamodb.repository.config.EnableDynamoDBRepositories;
-import org.socialsignin.spring.data.dynamodb.utils.DynamoDBLocalResource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 import java.util.Date;
@@ -34,9 +28,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.socialsignin.spring.data.dynamodb.repository.config.EnableDynamoDBRepositories;
+import org.socialsignin.spring.data.dynamodb.utils.DynamoDBLocalResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * Tests JDK8 features of spring-data
@@ -45,10 +46,10 @@ import static org.junit.Assert.assertTrue;
  *      "https://github.com/spring-projects/spring-data-examples/tree/master/jpa/java8">
  *      github.com/spring-projects/spring-data-examples/master/jpa/java8</a>
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {DynamoDBLocalResource.class, Jdk8IT.TestAppConfig.class})
 @TestPropertySource(properties = {"spring.data.dynamodb.entity2ddl.auto=create"})
-public class Jdk8IT {
+class Jdk8IT {
 
 	@Configuration
 	@EnableDynamoDBRepositories(basePackages = "org.socialsignin.spring.data.dynamodb.domain.sample")
@@ -59,7 +60,7 @@ public class Jdk8IT {
 	UserRepository userRepository;
 
 	@Test
-	public void testOptionalKey() {
+	void testOptionalKey() {
 		final Date joinDate = new Date(1000);
 		final String id = "testOptionalKey";
 		Optional<User> result = userRepository.findById(id);
@@ -81,7 +82,7 @@ public class Jdk8IT {
 	}
 
 	@Test
-	public void testFuture() throws InterruptedException, ExecutionException, TimeoutException {
+	void testFuture() throws InterruptedException, ExecutionException, TimeoutException {
 		User user = new User();
 		user.setName("testFuture");
 		user.setPostCode("postCode");
@@ -105,7 +106,7 @@ public class Jdk8IT {
 	}
 
 	@Test
-	public void testOptionalFilter() {
+	void testOptionalFilter() {
 		final Date joinDate = new Date(2000);
 		final String id = "testOptionalFilter";
 		final String name = UUID.randomUUID().toString();
@@ -128,7 +129,7 @@ public class Jdk8IT {
 	}
 
 	@Test
-	public void testInstantQuery() {
+	void testInstantQuery() {
 		final Instant leaveDate = Instant.ofEpochMilli(2000);
 
 		User newUser = new User();

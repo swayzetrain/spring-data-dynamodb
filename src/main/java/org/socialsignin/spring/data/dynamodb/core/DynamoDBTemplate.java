@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,10 @@
  */
 package org.socialsignin.spring.data.dynamodb.core;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper.FailedBatch;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperTableModel;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
-import com.amazonaws.services.dynamodbv2.datamodeling.KeyPair;
-import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
-import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
-import com.amazonaws.services.dynamodbv2.model.QueryRequest;
-import com.amazonaws.services.dynamodbv2.model.QueryResult;
-import com.amazonaws.services.dynamodbv2.model.Select;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
 import org.socialsignin.spring.data.dynamodb.mapping.event.AfterDeleteEvent;
 import org.socialsignin.spring.data.dynamodb.mapping.event.AfterLoadEvent;
 import org.socialsignin.spring.data.dynamodb.mapping.event.AfterQueryEvent;
@@ -44,10 +35,19 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper.FailedBatch;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperTableModel;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.KeyPair;
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
+import com.amazonaws.services.dynamodbv2.model.QueryRequest;
+import com.amazonaws.services.dynamodbv2.model.QueryResult;
+import com.amazonaws.services.dynamodbv2.model.Select;
 
 public class DynamoDBTemplate implements DynamoDBOperations, ApplicationContextAware {
 	private final DynamoDBMapper dynamoDBMapper;
@@ -133,7 +133,7 @@ public class DynamoDBTemplate implements DynamoDBOperations, ApplicationContextA
 				.map(entity -> {
 					maybeEmitEvent(entity, AfterLoadEvent::new);
 					return entity;
-				}).collect(Collectors.toList());
+				}).toList();
 	}
 
 	@Override
@@ -185,7 +185,7 @@ public class DynamoDBTemplate implements DynamoDBOperations, ApplicationContextA
 			queryResult.setLastEvaluatedKey(null);
 		}
 
-		return new PaginatedQueryList<T>(dynamoDBMapper, clazz, amazonDynamoDB, queryRequest, queryResult,
+		return new PaginatedQueryList<>(dynamoDBMapper, clazz, amazonDynamoDB, queryRequest, queryResult,
 				dynamoDBMapperConfig.getPaginationLoadingStrategy(), dynamoDBMapperConfig);
 	}
 

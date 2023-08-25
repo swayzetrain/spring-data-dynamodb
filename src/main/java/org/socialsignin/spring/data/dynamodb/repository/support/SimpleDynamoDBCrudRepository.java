@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,13 @@
  */
 package org.socialsignin.spring.data.dynamodb.repository.support;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper.FailedBatch;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
-import com.amazonaws.services.dynamodbv2.datamodeling.KeyPair;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.StreamSupport;
+
 import org.socialsignin.spring.data.dynamodb.core.DynamoDBOperations;
 import org.socialsignin.spring.data.dynamodb.exception.BatchWriteException;
 import org.socialsignin.spring.data.dynamodb.repository.DynamoDBCrudRepository;
@@ -27,13 +31,9 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper.FailedBatch;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.KeyPair;
 
 /**
  * Default implementation of the
@@ -102,7 +102,7 @@ public class SimpleDynamoDBCrudRepository<T, ID>
 			} else {
 				return new KeyPair().withHashKey(id);
 			}
-		}).collect(Collectors.toList());
+		}).toList();
 
 		Map<Class<?>, List<KeyPair>> keyPairsMap = Collections.<Class<?>, List<KeyPair>>singletonMap(domainType,
 				keyPairs);
@@ -206,5 +206,23 @@ public class SimpleDynamoDBCrudRepository<T, ID>
 	@NonNull
 	public DynamoDBEntityInformation<T, ID> getEntityInformation() {
 		return this.entityInformation;
+	}
+
+	@Override
+	public void deleteAllById(Iterable<? extends ID> ids) {
+		Assert.notNull(ids, "The given Iterable of entities not be null!");
+		
+		for(ID id : ids) {
+			Optional<T> entity = findById(id);
+
+			if (entity.isPresent()) {
+				dynamoDBOperations.delete(entity.get());
+
+			} else {
+				continue;
+			}
+		}
+		
+		
 	}
 }

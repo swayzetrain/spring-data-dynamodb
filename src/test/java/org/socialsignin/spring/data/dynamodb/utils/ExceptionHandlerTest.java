@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,31 +15,32 @@
  */
 package org.socialsignin.spring.data.dynamodb.utils;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import org.junit.Test;
-import org.socialsignin.spring.data.dynamodb.exception.BatchWriteException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.socialsignin.spring.data.dynamodb.exception.BatchWriteException;
 
-public class ExceptionHandlerTest {
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+
+class ExceptionHandlerTest {
 
 	private ExceptionHandler underTest = new ExceptionHandler() {
 	};
 
 	@Test
-	public void testEmpty() {
+	void testEmpty() {
 		underTest.repackageToException(Collections.emptyList(), BatchWriteException.class);
 
 		assertTrue(true);
 	}
 
 	@Test
-	public void testSimple() {
+	void testSimple() {
 		List<DynamoDBMapper.FailedBatch> failedBatches = new ArrayList<>();
 		DynamoDBMapper.FailedBatch fb1 = new DynamoDBMapper.FailedBatch();
 		fb1.setException(new Exception("Test Exception"));
@@ -50,7 +51,7 @@ public class ExceptionHandlerTest {
 
 		BatchWriteException actual = underTest.repackageToException(failedBatches, BatchWriteException.class);
 
-		assertEquals("Processing of entities failed!; nested exception is java.lang.Exception: Test Exception",
+		assertEquals("Processing of entities failed!",
 				actual.getMessage());
 
 		assertEquals(1, actual.getSuppressed().length);

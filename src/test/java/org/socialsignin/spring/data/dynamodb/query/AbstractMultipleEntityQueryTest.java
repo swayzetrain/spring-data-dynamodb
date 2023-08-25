@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,23 @@
  */
 package org.socialsignin.spring.data.dynamodb.query;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.socialsignin.spring.data.dynamodb.core.DynamoDBOperations;
-import org.socialsignin.spring.data.dynamodb.domain.sample.User;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.socialsignin.spring.data.dynamodb.core.DynamoDBOperations;
+import org.socialsignin.spring.data.dynamodb.domain.sample.User;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AbstractMultipleEntityQueryTest {
+@ExtendWith(MockitoExtension.class)
+class AbstractMultipleEntityQueryTest {
 
 	private static class TestAbstractMultipleEntityQuery extends AbstractMultipleEntityQuery<User> {
 		private final List<User> resultList;
@@ -48,9 +47,6 @@ public class AbstractMultipleEntityQueryTest {
 		}
 	}
 
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
-
 	@Mock
 	private DynamoDBOperations dynamoDBOperations;
 	@Mock
@@ -59,24 +55,23 @@ public class AbstractMultipleEntityQueryTest {
 	private AbstractMultipleEntityQuery<User> underTest;
 
 	@Test
-	public void testNullResult() {
+	void testNullResult() {
 		underTest = new TestAbstractMultipleEntityQuery(dynamoDBOperations);
 
 		assertNull(underTest.getSingleResult());
 	}
 
 	@Test
-	public void testSingleResult() {
+	void testSingleResult() {
 		underTest = new TestAbstractMultipleEntityQuery(dynamoDBOperations, entity);
 
 		assertSame(entity, underTest.getSingleResult());
 	}
 
 	@Test
-	public void testMultiResult() {
-		expectedException.expect(IncorrectResultSizeDataAccessException.class);
+	void testMultiResult() {
 		underTest = new TestAbstractMultipleEntityQuery(dynamoDBOperations, entity, entity);
 
-		underTest.getSingleResult();
+		assertThatThrownBy(() -> underTest.getSingleResult()).isInstanceOf(IncorrectResultSizeDataAccessException.class);
 	}
 }

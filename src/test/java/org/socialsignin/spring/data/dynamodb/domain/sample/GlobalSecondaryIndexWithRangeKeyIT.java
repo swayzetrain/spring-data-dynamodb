@@ -1,5 +1,5 @@
 /**
- * Copyright © 2018 spring-data-dynamodb (https://github.com/boostchicken/spring-data-dynamodb)
+ * Copyright © 2018 spring-data-dynamodb (https://github.com/swayzetrain/spring-data-dynamodb)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,29 @@
  */
 package org.socialsignin.spring.data.dynamodb.domain.sample;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.socialsignin.spring.data.dynamodb.repository.config.EnableDynamoDBRepositories;
 import org.socialsignin.spring.data.dynamodb.utils.DynamoDBLocalResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * Shows the usage of Hash+Range key combinations with global secondary indexes.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {DynamoDBLocalResource.class, GlobalSecondaryIndexWithRangeKeyIT.TestAppConfig.class})
 @TestPropertySource(properties = {"spring.data.dynamodb.entity2ddl.auto=create"})
 public class GlobalSecondaryIndexWithRangeKeyIT {
@@ -62,7 +62,7 @@ public class GlobalSecondaryIndexWithRangeKeyIT {
 
 		Date previousDate = null;
 		for (final Installation installation : actual) {
-			assertEquals(installation.getSystemId(), "systemId");
+			assertEquals("systemId", installation.getSystemId());
 			if (previousDate != null && installation.getUpdatedAt().compareTo(previousDate) != -1) {
 				fail("Results were not returned in descending order of updated date!");
 			} else {
